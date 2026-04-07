@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NaviWorld Prompt Library — ERP Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0B1120;
+  --navy2: #111827;
+  --navy3: #1a2540;
+  --surface: #1e2d45;
+  --surface2: #243352;
+  --border: rgba(100,140,200,0.12);
+  --border2: rgba(100,140,200,0.22);
+  --gold: #F5A623;
+  --gold2: #e8962a;
+  --blue: #4A9FE8;
+  --blue2: #3d8fd8;
+  --green: #34D399;
+  --red: #F87171;
+  --purple: #A78BFA;
+  --orange: #FB923C;
+  --teal: #2DD4BF;
+  --white: #F0F4FF;
+  --muted: #6B84A8;
+  --muted2: #8BA4C4;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* Ambient background */
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 80% 60% at 20% 10%,rgba(74,159,232,0.07) 0%,transparent 60%),
+  radial-gradient(ellipse 60% 50% at 80% 80%,rgba(245,166,35,0.05) 0%,transparent 60%),
+  radial-gradient(ellipse 40% 40% at 50% 50%,rgba(52,211,153,0.03) 0%,transparent 70%);
+pointer-events:none;z-index:0;}
+
+/* Layout */
+.app{display:grid;grid-template-columns:280px 1fr;min-height:100vh;position:relative;z-index:1;}
+
+/* ─── SIDEBAR ─── */
+.sidebar{background:var(--navy2);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:99px;}
+
+.sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--border);}
+.logo-mark{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--gold),#e8962a);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;line-height:1.2;}
+.logo-text small{display:block;font-size:10px;font-weight:400;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-family:'DM Mono',monospace;}
+
+/* Search */
+.search-wrap{position:relative;}
+.search-input{width:100%;padding:9px 12px 9px 36px;background:var(--surface);border:1px solid var(--border);border-radius:9px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .18s;}
+.search-input:focus{border-color:var(--blue);}
+.search-input::placeholder{color:var(--muted);}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;}
+.search-count{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+
+/* Group nav */
+.sidebar-nav{flex:1;padding:12px 10px;}
+.group-section{margin-bottom:4px;}
+.group-btn{width:100%;display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:all .15s;border:1px solid transparent;background:transparent;color:var(--white);text-align:left;}
+.group-btn:hover{background:rgba(74,159,232,0.06);border-color:rgba(74,159,232,0.15);}
+.group-btn.active{background:rgba(74,159,232,0.1);border-color:rgba(74,159,232,0.25);}
+.group-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.group-info{flex:1;min-width:0;}
+.group-name{font-size:12px;font-weight:600;font-family:'Syne',sans-serif;}
+.group-count{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.group-chevron{font-size:11px;color:var(--muted);transition:transform .2s;flex-shrink:0;}
+.group-btn.open .group-chevron{transform:rotate(90deg);}
+
+.prompt-list{display:none;padding:2px 0 4px 37px;}
+.group-btn.open + .prompt-list{display:block;}
+.prompt-nav-item{display:block;padding:5px 8px;border-radius:6px;font-size:11px;color:var(--muted2);cursor:pointer;transition:all .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:none;background:transparent;width:100%;text-align:left;}
+.prompt-nav-item:hover{color:var(--white);background:rgba(255,255,255,0.04);}
+.prompt-nav-item.active{color:var(--blue);font-weight:500;}
+
+.sidebar-footer{padding:14px 16px;border-top:1px solid var(--border);}
+.version-tag{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.08em;}
+.stat-row{display:flex;gap:12px;margin-top:8px;}
+.stat-item{text-align:center;}
+.stat-num{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--gold);}
+.stat-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-family:'DM Mono',monospace;}
+
+/* ─── MAIN ─── */
+.main{display:flex;flex-direction:column;min-height:100vh;}
+
+/* Topbar */
+.topbar{padding:16px 36px;border-bottom:1px solid var(--border);background:rgba(11,17,32,.92);backdrop-filter:blur(12px);position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.breadcrumb{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.breadcrumb .sep{color:var(--border2);}
+.breadcrumb .current{color:var(--white);font-weight:600;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .17s;text-decoration:none;letter-spacing:.01em;}
+.btn-primary{background:var(--gold);color:#0B1120;}
+.btn-primary:hover{background:#f0b340;transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border2);}
+.btn-ghost:hover{border-color:var(--blue);color:var(--white);}
+
+/* Content area */
+.content{flex:1;padding:32px 36px;}
+
+/* Overview Hero */
+.overview-hero{background:linear-gradient(135deg,var(--surface) 0%,var(--navy3) 100%);border:1px solid var(--border2);border-radius:16px;padding:32px 36px;margin-bottom:32px;position:relative;overflow:hidden;}
+.overview-hero::before{content:'ERP';position:absolute;right:-20px;top:-30px;font-family:'Syne',sans-serif;font-size:140px;font-weight:800;color:rgba(74,159,232,0.04);letter-spacing:-.05em;pointer-events:none;user-select:none;}
+.hero-eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.hero-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:8px;line-height:1.2;}
+.hero-sub{font-size:14px;color:var(--muted2);max-width:580px;line-height:1.7;}
+.hero-meta{display:flex;gap:20px;margin-top:20px;flex-wrap:wrap;}
+.hero-stat{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted2);}
+.hero-stat strong{color:var(--white);font-weight:700;}
+
+/* Group color dots */
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* Cards grid */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;}
+
+/* Prompt card */
+.prompt-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s;overflow:hidden;position:relative;}
+.prompt-card::before{content:'';position:absolute;inset:0;opacity:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(74,159,232,0.08),transparent 65%);transition:opacity .3s;pointer-events:none;}
+.prompt-card:hover::before{opacity:1;}
+.prompt-card:hover{border-color:rgba(74,159,232,0.3);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.3);}
+.card-header{padding:18px 20px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.card-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;}
+.card-group-badge{font-family:'DM Mono',monospace;font-size:9px;padding:3px 7px;border-radius:4px;letter-spacing:.06em;font-weight:500;flex-shrink:0;}
+.card-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;padding:0 20px 10px;line-height:1.35;}
+.card-desc{font-size:12px;color:var(--muted2);padding:0 20px 16px;line-height:1.6;}
+.card-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.tag{font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(74,159,232,0.08);color:var(--blue);font-family:'DM Mono',monospace;border:1px solid rgba(74,159,232,0.15);}
+.card-cta{font-size:11px;font-weight:600;color:var(--gold);display:flex;align-items:center;gap:3px;transition:gap .15s;}
+.prompt-card:hover .card-cta{gap:7px;}
+
+/* Section headers */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.section-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:9px;}
+.section-count{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+
+/* ─── DETAIL VIEW ─── */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:100;display:flex;opacity:0;pointer-events:none;transition:opacity .25s;}
+.detail-overlay.open{opacity:1;pointer-events:all;}
+.detail-panel{background:var(--navy2);border-left:1px solid var(--border2);width:100%;max-width:720px;margin-left:auto;overflow-y:auto;display:flex;flex-direction:column;transform:translateX(40px);transition:transform .25s;}
+.detail-overlay.open .detail-panel{transform:translateX(0);}
+.detail-panel::-webkit-scrollbar{width:4px;}
+.detail-panel::-webkit-scrollbar-thumb{background:var(--surface2);}
+
+.detail-topbar{padding:18px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;position:sticky;top:0;background:var(--navy2);z-index:5;}
+.detail-close{width:32px;height:32px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .15s;flex-shrink:0;}
+.detail-close:hover{color:var(--white);border-color:var(--border2);}
+.detail-breadcrumb{font-size:12px;color:var(--muted);flex:1;}
+.detail-breadcrumb strong{color:var(--white);}
+
+.detail-body{padding:28px;}
+.detail-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.detail-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:14px;line-height:1.25;}
+.detail-meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+.detail-meta-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted2);background:var(--surface);padding:4px 10px;border-radius:6px;border:1px solid var(--border);}
+
+.detail-section{margin-bottom:22px;}
+.detail-section-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.detail-section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.when-box{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:0 9px 9px 0;padding:12px 14px;font-size:13px;color:var(--muted2);line-height:1.6;}
+
+.input-list{display:flex;flex-direction:column;gap:5px;}
+.input-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted2);}
+.input-dot{width:5px;height:5px;border-radius:50%;background:var(--blue);flex-shrink:0;}
+
+/* Prompt box */
+.prompt-box{background:var(--navy);border:1px solid var(--border2);border-radius:12px;overflow:hidden;}
+.prompt-box-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface);}
+.prompt-box-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;}
+.copy-btn{display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;color:var(--blue);cursor:pointer;background:transparent;border:none;transition:color .15s;padding:2px 6px;border-radius:4px;}
+.copy-btn:hover{background:rgba(74,159,232,0.1);}
+.prompt-content{padding:16px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.75;color:rgba(240,244,255,0.85);white-space:pre-wrap;max-height:480px;overflow-y:auto;}
+.prompt-content::-webkit-scrollbar{width:3px;}
+.prompt-content::-webkit-scrollbar-thumb{background:var(--surface2);}
+
+/* Highlight placeholders in prompt */
+.ph{color:var(--gold);background:rgba(245,166,35,0.08);border-radius:3px;padding:0 2px;}
+
+.output-list{display:flex;flex-direction:column;gap:6px;}
+.output-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:rgba(240,244,255,0.75);line-height:1.5;}
+.output-check{width:16px;height:16px;border-radius:4px;background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.3);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--green);flex-shrink:0;margin-top:1px;}
+
+.tip-box{background:rgba(74,159,232,0.06);border:1px solid rgba(74,159,232,0.2);border-radius:9px;padding:12px 14px;display:flex;gap:9px;}
+.tip-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.tip-text{font-size:12px;color:var(--muted2);line-height:1.6;}
+
+.detail-actions{display:flex;gap:10px;padding:20px 28px;border-top:1px solid var(--border);}
+
+/* ADMIN MODE */
+.admin-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.admin-overlay.open{opacity:1;pointer-events:all;}
+.admin-modal{background:var(--navy2);border:1px solid var(--border-active,rgba(245,166,35,0.3));border-radius:18px;width:100%;max-width:680px;max-height:88vh;overflow-y:auto;padding:28px;transform:translateY(20px);transition:transform .25s;}
+.admin-overlay.open .admin-modal{transform:translateY(0);}
+.admin-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.admin-modal-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;}
+.admin-subtitle{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+.form-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+.form-input,.form-textarea,.form-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color .18s;width:100%;}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--gold);}
+.form-textarea{min-height:140px;resize:vertical;line-height:1.6;font-family:'DM Mono',monospace;font-size:12px;}
+.form-select option{background:var(--navy2);}
+.admin-footer{display:flex;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid var(--border);}
+
+/* AUTH */
+.auth-lock{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;}
+.auth-icon{font-size:36px;margin-bottom:16px;opacity:.5;}
+.auth-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:8px;}
+.auth-desc{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.6;}
+.auth-input{background:var(--surface);border:1px solid var(--border);border-radius:9px;color:var(--white);font-family:'DM Mono',monospace;font-size:14px;padding:10px 14px;outline:none;text-align:center;letter-spacing:.2em;margin-bottom:12px;width:220px;transition:border-color .18s;}
+.auth-input:focus{border-color:var(--gold);}
+.auth-input.err{border-color:var(--red);animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;opacity:0;transform:translateY(12px);transition:all .25s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.success{border-color:rgba(52,211,153,0.4);}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:24px;}
+.filter-btn{padding:5px 13px;border-radius:99px;border:1px solid var(--border);font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;background:transparent;font-family:'DM Mono',monospace;}
+.filter-btn:hover{border-color:rgba(74,159,232,0.4);color:var(--white);}
+.filter-btn.active{background:var(--blue);color:var(--navy);border-color:var(--blue);}
+
+/* No results */
+.no-results{text-align:center;padding:60px 20px;color:var(--muted);}
+.no-results-icon{font-size:36px;margin-bottom:12px;opacity:.4;}
+.no-results-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;color:var(--white);}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.prompt-card{animation:fadeUp .35s both;}
+.prompt-card:nth-child(1){animation-delay:.03s}.prompt-card:nth-child(2){animation-delay:.06s}
+.prompt-card:nth-child(3){animation-delay:.09s}.prompt-card:nth-child(4){animation-delay:.12s}
+.prompt-card:nth-child(5){animation-delay:.15s}.prompt-card:nth-child(6){animation-delay:.18s}
+.prompt-card:nth-child(7){animation-delay:.21s}.prompt-card:nth-child(8){animation-delay:.24s}
+
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:99px}
+
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.content{padding:20px}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-mark">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">NaviWorld<small>Prompt Intelligence</small></div>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="sidebarSearch" placeholder="Tìm kiếm prompt..." oninput="handleSearch(this.value)">
+      <span class="search-count" id="searchCount"></span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav" id="sidebarNav"></nav>
+
+  <div class="sidebar-footer">
+    <div class="version-tag">ERP Prompt Library v1.0 · 04/2026</div>
+    <div class="stat-row">
+      <div class="stat-item"><div class="stat-num">53</div><div class="stat-label">Prompts</div></div>
+      <div class="stat-item"><div class="stat-num">8</div><div class="stat-label">Nhóm</div></div>
+      <div class="stat-item"><div class="stat-num">∞</div><div class="stat-label">Use cases</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">
+        <span>NaviWorld</span><span class="sep">›</span>
+        <span class="current" id="topbarTitle">Tất cả Prompts</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost" onclick="openAdmin()">⚙️ Admin</button>
+      <button class="btn btn-primary" onclick="openNewPrompt()">+ Thêm Prompt</button>
+    </div>
+  </header>
+
+  <div class="content" id="mainContent">
+    <!-- Rendered by JS -->
+  </div>
+</main>
+</div>
+
+<!-- ═══ DETAIL PANEL ═══ -->
+<div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-topbar">
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+      <div class="detail-breadcrumb" id="detailBreadcrumb">—</div>
+      <button class="btn btn-ghost" onclick="copyCurrentPrompt()" style="font-size:11px;padding:5px 10px">📋 Copy Prompt</button>
+      <button class="btn btn-ghost" id="detailEditBtn" onclick="editCurrentPrompt()" style="font-size:11px;padding:5px 10px;display:none">✏️ Sửa</button>
+    </div>
+    <div class="detail-body" id="detailBody"></div>
+    <div class="detail-actions">
+      <button class="btn btn-primary" style="flex:1" onclick="copyCurrentPrompt()">📋 Copy Prompt đầy đủ</button>
+      <button class="btn btn-ghost" onclick="closeDetail()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN MODAL ═══ -->
+<div class="admin-overlay" id="adminOverlay" onclick="if(event.target===this)closeAdmin()">
+  <div class="admin-modal" id="adminModal">
+    <!-- Auth or Form rendered by JS -->
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast"><span id="toastIcon"></span><span id="toastMsg"></span></div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA — 43 PROMPTS COMPLETE
+// ═══════════════════════════════════════════
+const GROUPS = [
+  {id:'sales',   label:'A. Sales',        icon:'💼', color:'#F5A623', bg:'rgba(245,166,35,0.12)'},
+  {id:'proposal',label:'B. Proposal',     icon:'📄', color:'#4A9FE8', bg:'rgba(74,159,232,0.12)'},
+  {id:'forecast',label:'C. Forecast',     icon:'📊', color:'#34D399', bg:'rgba(52,211,153,0.12)'},
+  {id:'coaching',label:'D. Coaching',     icon:'🎯', color:'#A78BFA', bg:'rgba(167,139,250,0.12)'},
+  {id:'learning',label:'E. Learning',     icon:'📚', color:'#2DD4BF', bg:'rgba(45,212,191,0.12)'},
+  {id:'pm',      label:'F. Project Mgmt', icon:'🏗️', color:'#FB923C', bg:'rgba(251,146,60,0.12)'},
+  {id:'bc',      label:'G. Business Case',icon:'💰', color:'#F87171', bg:'rgba(248,113,113,0.12)'},
+  {id:'tech',    label:'H. Kỹ Thuật & Dev', icon:'⚙️', color:'#38BDF8', bg:'rgba(56,189,248,0.12)'},
+];
+
+const PROMPTS = [
+  // ── A. SALES ──
+  {id:1,group:'sales',num:'Sales 01',title:'Discovery theo ngành',
+   when:'Khi chuẩn bị first meeting hoặc discovery meeting với khách hàng trong một ngành cụ thể.',
+   inputs:['Ngành','Quy mô (doanh thu / nhân sự / số nhà máy)','Hệ thống hiện tại','Bối cảnh doanh nghiệp','Persona sẽ gặp'],
+   prompt:`Bạn là chuyên gia bán hàng ERP enterprise.
+
+Khách hàng mục tiêu:
+- Ngành: [ngành]
+- Quy mô: [doanh thu / nhân sự / số nhà máy / số chi nhánh]
+- Hệ thống hiện tại: [Excel / phần mềm nội bộ / SAP / Oracle / phần mềm local]
+- Bối cảnh: [đang mở rộng / nhiều công ty con / tồn kho cao / báo cáo chậm / chuyển đổi số]
+
+H�y tạo bộ discovery cho sales ERP gồm:
+1. 10 pain points có khả năng cao
+2. 20 câu hỏi discovery ưu tiên
+3. 10 câu hỏi follow-up để đào sâu
+4. 5 tín hiệu cho thấy dự án có urgency thật
+5. 5 red flags cần chú ý
+6. Cách chốt next step sau buổi họp đầu
+
+Yêu cầu:
+- Ưu tiên góc nhìn business hơn kỹ thuật
+- Phân tách theo CFO / COO / CIO / vận hành nếu cần
+- Trả lời bằng tiếng Việt chuyên nghiệp, dùng được ngay`,
+   outputs:['Bộ discovery dùng được ngay','Câu hỏi theo persona','Dấu hiệu qualification','Hướng follow-up sau cuộc họp'],
+   tip:'Thêm tên persona cụ thể nếu muốn bộ câu hỏi sắc hơn.'},
+
+  {id:2,group:'sales',num:'Sales 02',title:'Discovery theo persona',
+   when:'Khi chuẩn bị gặp một vai trò cụ thể như CFO, COO, CIO, CEO, HRD, Plant Director.',
+   inputs:['Persona (CFO/CEO/COO/CIO/HRD/Plant Director)','Ngành','Quy mô','Hệ thống hiện tại','Mục tiêu có thể có'],
+   prompt:`Tôi chuẩn bị gặp [CFO/CEO/COO/CIO/HRD/Plant Director] của một khách hàng đang cân nhắc ERP.
+
+Bối cảnh:
+- Ngành: [ngành]
+- Quy mô: [quy mô]
+- Hệ thống hiện tại: [hệ thống]
+- Mục tiêu có thể có: [tăng kiểm soát / giảm tồn kho / chuẩn hóa quy trình / hợp nhất dữ liệu]
+
+H�y giúp tôi:
+1. Nêu 8 ưu tiên có khả năng cao của persona này
+2. Viết 15 câu hỏi discovery phù hợp với persona
+3. Nêu 5 điều persona này thường lo ngại khi mua ERP
+4. Gợi ý 5 câu hỏi follow-up để chạm business case
+5. Viết 1 opening statement 60 giây cho buổi gặp`,
+   outputs:['Bộ câu hỏi đúng người','Opening statement','Mối quan tâm và objection của persona'],
+   tip:'Thêm "khách hàng đang dùng SAP/Excel/phần mềm local" để sắc hơn.'},
+
+  {id:3,group:'sales',num:'Sales 03',title:'Account plan cho strategic account',
+   when:'Khi cần xây account plan cho khách hàng lớn hoặc strategic account.',
+   inputs:['Account notes','Org chart','Meeting notes','CRM summary'],
+   prompt:`Đây là thông tin về tài khoản chiến lược:
+
+[Paste account notes / org chart / meeting notes / CRM summary]
+
+H�y xây account plan cho deal ERP theo cấu trúc:
+1. Tóm tắt doanh nghiệp và bối cảnh chuyển đổi
+2. Giả thuyết pain points cốt lõi
+3. Stakeholder map: ủng hộ / trung lập / cản trở / chưa tiếp cận
+4. Buying triggers
+5. Đối thủ cạnh tranh và nguy cơ
+6. Khoảng trống thông tin cần làm rõ
+7. Kế hoạch 30 ngày
+8. Executive engagement strategy
+9. Xác suất thắng hiện tại và điều kiện để tăng xác suất đó
+
+Quy tắc:
+- Không suy đoán như fact
+- Phân biệt fact, giả định, khuyến nghị`,
+   outputs:['Account plan có logic','Stakeholder map','Plan 30 ngày','Xác suất thắng và điều kiện cải thiện'],
+   tip:'Thêm "phân tích theo MEDDICC" nếu công ty dùng framework đó.'},
+
+  {id:4,group:'sales',num:'Sales 04',title:'Deal inspection',
+   when:'Khi cần review nhanh độ chắc của một cơ hội bán hàng.',
+   inputs:['CRM notes','Meeting notes','Email summary','Proposal status'],
+   prompt:`Hãy review cơ hội bán ERP này như một giám đốc kinh doanh khó tính.
+
+Thông tin deal:
+[Paste CRM notes / meeting notes / email summary / proposal status]
+
+Tôi cần:
+1. Deal summary
+2. Business pain and urgency
+3. Stakeholders đã rõ / còn thiếu
+4. Buying process và rủi ro
+5. Lỗ hổng discovery
+6. Threat từ đối thủ
+7. Forecast confidence: High / Medium / Low và lý do
+8. Top 5 việc phải làm ngay trong 14 ngày tới
+9. Câu hỏi sales rep phải trả lời trước cuộc forecast call tiếp theo`,
+   outputs:['Tóm tắt deal','Forecast confidence','5 hành động ưu tiên'],
+   tip:'Thêm "hãy chấm điểm deal theo thang 10" nếu muốn dễ so sánh giữa nhiều deal.'},
+
+  {id:5,group:'sales',num:'Sales 05',title:'Chuẩn bị first meeting',
+   when:'Khi chuẩn bị họp lần đầu với khách hàng tiềm năng.',
+   inputs:['Công ty / ngành / quy mô','Người tham dự','Mục tiêu cuộc họp'],
+   prompt:`Tôi sắp có buổi first meeting với khách hàng tiềm năng ERP.
+
+Thông tin hiện có:
+- Công ty: [tên / ngành / quy mô]
+- Bối cảnh: [mô tả]
+- Người tham dự: [vai trò]
+- Nguồn lead: [referral / inbound / partner / outbound]
+- Mục tiêu của tôi: [qualification / mở rộng / demo / chốt workshop]
+
+H�y chuẩn bị cho tôi:
+1. Mục tiêu cuộc họp
+2. Agenda 30–45 phút
+3. 12 câu hỏi cần hỏi
+4. 5 điều tuyệt đối không nên làm
+5. 3 hướng chốt next step
+6. Mẫu email follow-up sau họp`,
+   outputs:['Agenda','Bộ câu hỏi','Email follow-up'],
+   tip:'Thêm "người tham dự là CFO + COO" nếu muốn điều chỉnh agenda tốt hơn.'},
+
+  {id:6,group:'sales',num:'Sales 06',title:'Multi-threading plan',
+   when:'Khi deal đang phụ thuộc một đầu mối duy nhất.',
+   inputs:['Context deal','Stakeholder hiện tại','Tình trạng phụ thuộc'],
+   prompt:`Tôi đang bị phụ thuộc vào 1 đầu mối trong deal ERP này.
+
+Bối cảnh:
+[Paste account/deal context]
+
+H�y giúp tôi:
+1. Xác định những vai trò khác tôi cần tiếp cận
+2. Nêu lý do chiến lược của từng vai trò
+3. Gợi ý thông điệp tiếp cận cho từng vai trò
+4. Viết kế hoạch multi-threading 14 ngày
+5. Chỉ ra rủi ro nếu không mở rộng stakeholder map`,
+   outputs:['Vai trò cần mở rộng','Lý do tiếp cận','Thông điệp theo vai trò','Kế hoạch 14 ngày'],
+   tip:'Thêm "đối thủ đang có quan hệ mạnh với CIO" để hệ thống nhấn đúng trọng tâm.'},
+
+  {id:7,group:'sales',num:'Sales 07',title:'Next best action sau cuộc họp',
+   when:'Khi vừa họp xong và cần ra bước tiếp theo nhanh.',
+   inputs:['Call notes','Email notes','Key concerns'],
+   prompt:`Dưới đây là notes cuộc họp với khách hàng:
+
+[Paste call notes]
+
+H�y phân tích và trả về:
+1. 5 insight quan trọng nhất
+2. Những tín hiệu mua hàng đáng chú ý
+3. Những điểm còn mơ hồ
+4. 3 giả thuyết về nhu cầu thực sự của khách
+5. Next best action tốt nhất
+6. Email follow-up ngắn gọn để chốt bước tiếp theo`,
+   outputs:['5 insight','Điểm còn mơ hồ','Next best action','Email follow-up'],
+   tip:'Yêu cầu thêm "viết 2 phiên bản email: mềm và sắc".'},
+
+  {id:8,group:'sales',num:'Sales 08',title:'Objection handling',
+   when:'Khi khách hàng phản đối về giá, timing, rủi ro, thay đổi hoặc đối thủ.',
+   inputs:['Objection cụ thể','Ngành','Stage deal','Persona phản đối','Đối thủ'],
+   prompt:`Khách hàng đang phản đối như sau:
+[Paste objection]
+
+Bối cảnh deal:
+- Ngành: [ngành]
+- Giai đoạn deal: [stage]
+- Persona phản đối: [vai trò]
+- Đối thủ đang có mặt: [nếu có]
+
+H�y giúp tôi:
+1. Giải mã objection thật phía sau câu nói đó
+2. Phân loại: giá / rủi ro / thay đổi / kỹ thuật / chính trị nội bộ / timing
+3. Viết 3 cách phản hồi phù hợp
+4. Gợi ý 5 câu hỏi để đào sâu
+5. Điều gì không nên nói`,
+   outputs:['Hiểu objection thật','3 cách phản hồi','5 câu hỏi đào sâu'],
+   tip:'Thêm "khách rất nhạy về giá" hoặc "khách đã từng fail dự án ERP" để phản hồi thực tế hơn.'},
+
+  // ── B. PROPOSAL ──
+  {id:9,group:'proposal',num:'Proposal 09',title:'Executive summary cho proposal',
+   when:'Khi cần viết phần mở đầu thuyết phục cho proposal ERP.',
+   inputs:['Notes pain points','Mục tiêu khách hàng'],
+   prompt:`Từ các ghi chú và pain points dưới đây, hãy viết executive summary cho proposal ERP.
+
+Dữ liệu:
+[Paste notes]
+
+Yêu cầu:
+- Giọng điều hành, chuyên nghiệp
+- Tập trung vào business impact
+- Không dài dòng
+- Cấu trúc: hiện trạng → vấn đề → mục tiêu → hướng tiếp cận → giá trị kỳ vọng → bước tiếp theo
+- Viết sao cho CEO/CFO đọc hiểu nhanh`,
+   outputs:['Executive summary','Giọng executive','Logic rõ và ngắn'],
+   tip:'Thêm "giới hạn 250–300 từ" nếu muốn gọn.'},
+
+  {id:10,group:'proposal',num:'Proposal 10',title:'Business value narrative',
+   when:'Khi cần viết phần giá trị kinh doanh của dự án.',
+   inputs:['Pain points','Goals','Scope','Context ngành'],
+   prompt:`Hãy viết phần Business Value cho proposal ERP này.
+
+Thông tin đầu vào:
+- Pain points: [pain points]
+- Mục tiêu khách hàng: [goals]
+- Phạm vi dự án: [scope]
+- Bối cảnh ngành: [context]
+
+Tôi cần:
+1. Narrative tổng thể về giá trị
+2. Giá trị vận hành
+3. Giá trị quản trị
+4. Giá trị tài chính
+5. Giá trị mở rộng trong tương lai
+6. Cách diễn đạt tránh overclaim`,
+   outputs:['Narrative có cấu trúc','Value theo nhiều chiều','Tránh overclaim'],
+   tip:'Thêm KPI ngành nếu muốn value cụ thể hơn.'},
+
+  {id:11,group:'proposal',num:'Proposal 11',title:'Scope overview',
+   when:'Khi cần trình bày phạm vi dự án rõ ràng, logic.',
+   inputs:['Scope notes','Modules','Phase'],
+   prompt:`Dựa trên thông tin sau, hãy viết phần Scope Overview cho proposal ERP:
+
+[Paste scope notes]
+
+Yêu cầu:
+- Chia theo phase hoặc module nếu phù hợp
+- Nêu rõ phạm vi bao gồm
+- Nêu rõ các giả định
+- Tránh mô tả kỹ thuật quá sâu
+- Viết để khách hàng hiểu logic triển khai`,
+   outputs:['Scope dễ hiểu','Module/phase rõ','Assumptions ban đầu'],
+   tip:'Thêm "khách là tập đoàn nhiều công ty con" nếu muốn cách chia phase phù hợp hơn.'},
+
+  {id:12,group:'proposal',num:'Proposal 12',title:'Assumptions & exclusions',
+   when:'Khi cần bảo vệ phạm vi dự án và tránh hiểu sai khi đàm phán.',
+   inputs:['Scope','Context dự án','Các điểm nhạy cảm'],
+   prompt:`Tôi cần viết phần assumptions và exclusions cho proposal ERP.
+
+Thông tin dự án:
+[Paste scope / context]
+
+H�y tạo:
+1. 10 assumptions hợp lý
+2. 10 exclusions thường cần nêu rõ
+3. Cảnh báo chỗ dễ gây tranh cãi khi đàm phán
+4. Cách viết trung tính nhưng bảo vệ phạm vi dự án`,
+   outputs:['Assumptions','Exclusions','Điểm dễ tranh cãi'],
+   tip:'Thêm "có tích hợp hệ thống legacy" để assumptions sát thực hơn.'},
+
+  {id:13,group:'proposal',num:'Proposal 13',title:'Proposal reviewer',
+   when:'Khi muốn review proposal như góc nhìn khách hàng enterprise khó tính.',
+   inputs:['Proposal draft'],
+   prompt:`Hãy review proposal này như một khách hàng enterprise khó tính.
+
+Mục tiêu review:
+1. Điểm mạnh
+2. Điểm chưa rõ
+3. Claim nào còn yếu
+4. Phần nào chưa chạm pain points
+5. Chỗ nào có nguy cơ bị procurement/legal bắt bẻ
+6. Cách sửa để proposal thuyết phục hơn
+
+Dữ liệu:
+[Paste proposal draft]`,
+   outputs:['Review sắc','Claim yếu','Chỗ cần sửa'],
+   tip:'Yêu cầu thêm "viết lại 3 đoạn yếu nhất".'},
+
+  {id:14,group:'proposal',num:'Proposal 14',title:'Proposal tailor theo ngành',
+   when:'Khi cần "ngành hóa" proposal để khách thấy đúng bối cảnh của họ.',
+   inputs:['Proposal summary','Ngành mục tiêu'],
+   prompt:`Hãy điều chỉnh proposal ERP này cho phù hợp ngành [ngành].
+
+Tôi cần:
+1. Các pain points đặc thù ngành cần nhấn mạnh
+2. Use cases nên đưa vào
+3. KPI ngành nên nhắc tới
+4. Ngôn ngữ nên dùng để khách thấy "đúng ngành của họ"
+5. Các đoạn nên sửa lại trong executive summary và value proposition
+
+Nội dung gốc:
+[Paste proposal summary]`,
+   outputs:['Góc nhìn ngành','Use cases đúng','KPI phù hợp','Đề xuất chỉnh câu chữ'],
+   tip:'Thêm "ngành sản xuất rời rạc/process manufacturing/distribution" để chuyên sâu hơn.'},
+
+  // ── C. FORECAST ──
+  {id:15,group:'forecast',num:'Forecast 15',title:'Forecast deal review',
+   when:'Khi cần đánh giá một deal có đủ chắc để forecast hay không.',
+   inputs:['CRM summary','Stage','Notes','Emails'],
+   prompt:`Hãy đánh giá độ tin cậy forecast của deal ERP này.
+
+Thông tin:
+[Paste CRM summary / stage / notes / emails]
+
+Tôi cần:
+1. Các yếu tố ủng hộ deal sẽ close
+2. Các yếu tố cho thấy deal có thể trượt
+3. Stage hiện tại có hợp lý không
+4. Forecast confidence: High / Medium / Low
+5. Dữ liệu còn thiếu trước khi commit
+6. Hành động để tăng độ chắc của deal`,
+   outputs:['Confidence','Stage fit','Thiếu gì trước commit'],
+   tip:'Thêm "dựa trên MEDDICC/BANT" nếu cần.'},
+
+  {id:16,group:'forecast',num:'Forecast 16',title:'Pipeline inspection theo tuần',
+   when:'Khi cần bóc chất lượng pipeline theo tuần.',
+   inputs:['Pipeline summary','Deal list'],
+   prompt:`Dưới đây là pipeline tuần này:
+
+[Paste pipeline summary hoặc deal list]
+
+H�y phân tích như một CRO/sales director:
+1. Top deals đáng tin cậy nhất
+2. Deals đang over-forecast
+3. Deals bị aging bất thường
+4. Khu vực / ngành / rep nào đang yếu
+5. 5 rủi ro lớn nhất của pipeline
+6. 7 hành động quản trị cần làm trong tuần`,
+   outputs:['Top deals','Over-forecast','7 hành động quản trị'],
+   tip:'Thêm số ngày aging hoặc quota attainment để sắc hơn.'},
+
+  {id:17,group:'forecast',num:'Forecast 17',title:'Commit vs best case',
+   when:'Khi cần tách commit, best case, upside.',
+   inputs:['Deal table','Summary'],
+   prompt:`Tôi cần tách pipeline thành Commit / Best Case / Upside.
+
+Dữ liệu:
+[Paste deal table hoặc summary]
+
+H�y:
+1. Phân loại từng deal vào Commit / Best Case / Upside
+2. Giải thích lý do phân loại
+3. Chỉ ra deal nào không nên đưa vào commit
+4. Điều kiện nào cần đạt để chuyển từ Best Case sang Commit`,
+   outputs:['Phân loại deal','Lý do','Điều kiện để nâng cấp forecast'],
+   tip:'Thêm "hãy cho xác suất close %" nếu muốn lượng hóa hơn.'},
+
+  {id:18,group:'forecast',num:'Forecast 18',title:'Forecast call prep',
+   when:'Khi chuẩn bị họp forecast với đội sales.',
+   inputs:['Summary pipeline','Danh sách deal'],
+   prompt:`Tôi sắp họp forecast với đội sales ERP.
+
+Đây là summary pipeline:
+[Paste summary]
+
+H�y chuẩn bị cho tôi:
+1. 10 câu hỏi sắc để hỏi sales reps
+2. Danh sách deal cần đào sâu nhất
+3. Các tín hiệu "ảo" thường gặp trong forecast
+4. Mẫu kết luận họp forecast
+5. Checklist kiểm tra chất lượng commit`,
+   outputs:['Câu hỏi forecast call','Deal cần đào sâu','Checklist commit'],
+   tip:'Yêu cầu "ưu tiên top 10 deal lớn nhất" nếu muốn tập trung.'},
+
+  {id:19,group:'forecast',num:'Forecast 19',title:'Win-loss pattern analysis',
+   when:'Khi cần rút bài học từ các deal thắng và thua.',
+   inputs:['Danh sách win/loss','Notes lý do'],
+   prompt:`Đây là danh sách các deal thắng và thua trong [quý/tháng]:
+
+[Paste summary]
+
+H�y phân tích:
+1. Pattern của deal thắng
+2. Pattern của deal thua
+3. Lý do thua gốc rễ
+4. Khoảng trống trong sales process
+5. 5 thay đổi cần áp dụng cho quý tới`,
+   outputs:['Pattern win/loss','Gốc rễ thất bại','Thay đổi cho quý sau'],
+   tip:'Yêu cầu "phân tích theo vertical hoặc rep" nếu có đủ dữ liệu.'},
+
+  {id:20,group:'forecast',num:'Forecast 20',title:'Territory / segment forecast diagnosis',
+   when:'Khi cần kiểm tra sức khỏe pipeline theo vùng, vertical, segment.',
+   inputs:['Numbers theo segment/vùng'],
+   prompt:`Hãy chẩn đoán sức khỏe pipeline theo từng vùng / vertical / segment.
+
+Dữ liệu:
+[Paste numbers]
+
+Tôi cần:
+1. Segment nào đang mạnh
+2. Segment nào đang có rủi ro hụt pipeline
+3. Chất lượng pipeline theo từng nhóm
+4. Giả thuyết nguyên nhân
+5. Kế hoạch khắc phục 30 ngày`,
+   outputs:['Chẩn đoán theo nhóm','Giả thuyết nguyên nhân','Kế hoạch 30 ngày'],
+   tip:'Bổ sung quota và conversion rate nếu có.'},
+
+  // ── D. COACHING ──
+  {id:21,group:'coaching',num:'Coaching 21',title:'Coaching từ call notes',
+   when:'Khi muốn coaching rep sau một cuộc gọi.',
+   inputs:['Call notes'],
+   prompt:`Dựa trên call notes dưới đây, hãy coach sales rep.
+
+[Paste notes]
+
+Trả về:
+1. 3 điểm rep làm tốt
+2. 5 điểm cần cải thiện
+3. Câu hỏi rep đáng lẽ phải hỏi
+4. Chỗ nào rep nói quá sớm / quá nhiều / quá product-centric
+5. 3 bài tập coaching cho tuần này`,
+   outputs:['Coaching points','Câu hỏi còn thiếu','Bài tập tuần'],
+   tip:'Yêu cầu "đánh giá theo discovery, control, business value, next step".'},
+
+  {id:22,group:'coaching',num:'Coaching 22',title:'Coaching từ email',
+   when:'Khi review email bán hàng hoặc follow-up của rep.',
+   inputs:['Email gốc'],
+   prompt:`Hãy review email bán hàng này như một sales manager.
+
+Email:
+[Paste email]
+
+Tôi cần:
+1. Chấm điểm /10
+2. Điểm mạnh
+3. Điểm yếu
+4. Chỗ nào chưa chạm business pain
+5. Viết lại phiên bản tốt hơn
+6. Giải thích vì sao bản sửa tốt hơn`,
+   outputs:['Điểm số','Bản sửa','Giải thích để coaching'],
+   tip:'Yêu cầu thêm "tone executive hơn" hoặc "ngắn hơn 30%".'},
+
+  {id:23,group:'coaching',num:'Coaching 23',title:'Coaching discovery skill',
+   when:'Khi cần đánh giá kỹ năng discovery của rep.',
+   inputs:['Transcript hoặc notes'],
+   prompt:`Đây là transcript hoặc ghi chú discovery call:
+
+[Paste transcript/notes]
+
+H�y đánh giá:
+1. Chất lượng discovery theo thang 10
+2. Rep đã hiểu pain thật chưa
+3. Stakeholder mapping có đủ chưa
+4. Câu hỏi nào chưa được hỏi
+5. Cách rep nên điều hướng cuộc nói chuyện tốt hơn
+6. Kế hoạch cải thiện kỹ năng trong 2 tuần`,
+   outputs:['Đánh giá discovery','Gap cần sửa','Kế hoạch 2 tuần'],
+   tip:'Thêm "hãy chấm theo tiêu chí opening, questioning, diagnosis, control, close".'},
+
+  {id:24,group:'coaching',num:'Coaching 24',title:'Role-play xử lý objection',
+   when:'Khi cần luyện phản xạ xử lý objection.',
+   inputs:['Ngành','Persona','Objection','Mức độ khó'],
+   prompt:`Hãy đóng vai khách hàng enterprise đang phản đối một dự án ERP.
+
+Bối cảnh:
+- Ngành: [ngành]
+- Persona: [vai trò]
+- Objection chính: [objection]
+- Mức độ khó: [vừa / khó / rất khó]
+
+Cách làm:
+- Bạn đặt objection từng bước
+- Đợi tôi trả lời
+- Sau mỗi câu trả lời của tôi, hãy chấm điểm và góp ý
+- Mục tiêu là giúp tôi luyện xử lý objection ở mức giám đốc kinh doanh`,
+   outputs:['Phiên role-play','Góp ý từng lượt','Cải thiện phản xạ'],
+   tip:'Thêm "đóng vai CFO rất hoài nghi" để khó hơn.'},
+
+  {id:25,group:'coaching',num:'Coaching 25',title:'1:1 coaching agenda',
+   when:'Khi chuẩn bị họp 1:1 với AE hoặc sales manager tuyến dưới.',
+   inputs:['Performance','Deal list','Issues'],
+   prompt:`Tôi chuẩn bị họp 1:1 với sales rep này.
+
+Thông tin:
+[Paste rep performance / deal list / issues]
+
+H�y tạo agenda 1:1 gồm:
+1. Mục tiêu buổi coaching
+2. 5 câu hỏi trọng tâm
+3. 3 deal cần review
+4. 2 kỹ năng cần tập trung
+5. Kế hoạch follow-up sau buổi 1:1`,
+   outputs:['Agenda 1:1','Câu hỏi coaching','Follow-up plan'],
+   tip:'Yêu cầu thêm "gắn với quota và next quarter plan".'},
+
+  // ── E. LEARNING ──
+  {id:26,group:'learning',num:'Learning 26',title:'Học một chủ đề ERP theo góc nhìn sales',
+   when:'Khi cần học nhanh một chủ đề nghiệp vụ ERP để bán hàng tốt hơn.',
+   inputs:['Chủ đề ERP cần học'],
+   prompt:`Hãy dạy tôi về chủ đề [MRP / costing / warehouse / production planning / order-to-cash / procure-to-pay / financial consolidation / fixed assets / demand planning] dưới góc nhìn bán hàng ERP.
+
+Cấu trúc:
+1. Khái niệm cốt lõi
+2. Vấn đề doanh nghiệp thường gặp
+3. ERP giải quyết như thế nào
+4. Câu hỏi discovery nên hỏi
+5. Use case thực tế
+6. Cách giải thích ngắn cho CEO/CFO/COO
+7. 10 thuật ngữ tôi phải nắm`,
+   outputs:['Kiến thức nền','Góc nhìn bán hàng','Discovery questions','Thuật ngữ'],
+   tip:'Thêm ngành cụ thể để use case sát hơn.'},
+
+  {id:27,group:'learning',num:'Learning 27',title:'Học theo ngành',
+   when:'Khi cần hiểu một vertical để bán ERP tốt hơn.',
+   inputs:['Ngành cần học'],
+   prompt:`Tôi muốn học ngành [manufacturing / retail / distribution / F&B / pharma / construction / services] để bán ERP tốt hơn.
+
+H�y tạo cho tôi:
+1. Tổng quan mô hình vận hành ngành
+2. Pain points phổ biến
+3. Quy trình nào thường gây đứt gãy dữ liệu
+4. KPI điều hành quan trọng
+5. Các use cases ERP có sức nặng nhất
+6. Câu hỏi discovery theo ngành
+7. Objection thường gặp khi bán ERP cho ngành này`,
+   outputs:['Hiểu ngành','Pain points','KPI','Discovery theo ngành'],
+   tip:'Thêm "quy mô enterprise / mid-market" để điều chỉnh tốt hơn.'},
+
+  {id:28,group:'learning',num:'Learning 28',title:'Flashcards thuật ngữ',
+   when:'Khi muốn học nhanh thuật ngữ trước khi gặp khách.',
+   inputs:['Chủ đề ERP/ngành'],
+   prompt:`Hãy biến chủ đề [chủ đề ERP/ngành] thành bộ flashcards học nhanh.
+
+Yêu cầu:
+- 25 flashcards
+- Mỗi flashcard: thuật ngữ / định nghĩa ngắn / vì sao quan trọng trong bán ERP / ví dụ thực tế
+- Ưu tiên thuật ngữ cần nhớ để nói chuyện với khách hàng cấp quản lý`,
+   outputs:['25 flashcards','Định nghĩa ngắn','Ứng dụng bán hàng'],
+   tip:'Yêu cầu thêm "sắp xếp từ cơ bản đến nâng cao".'},
+
+  {id:29,group:'learning',num:'Learning 29',title:'Học qua case study',
+   when:'Khi muốn học bằng tình huống gần thực tế.',
+   inputs:['Ngành'],
+   prompt:`Hãy tạo 3 case study giả lập nhưng thực tế về dự án ERP trong ngành [ngành].
+
+Mỗi case gồm:
+1. Bối cảnh công ty
+2. Vấn đề trước dự án
+3. Vì sao họ cân nhắc ERP
+4. Cách đánh giá lựa chọn
+5. Rào cản nội bộ
+6. Giá trị kỳ vọng
+7. Bài học bán hàng rút ra cho tôi`,
+   outputs:['3 case study','Bài học bán hàng','Rào cản thực tế'],
+   tip:'Yêu cầu một case thắng, một case thua, một case trì hoãn để học đa chiều.'},
+
+  {id:30,group:'learning',num:'Learning 30',title:'Kế hoạch học 8 tuần',
+   when:'Khi muốn có lộ trình học bài bản, gắn với công việc thật.',
+   inputs:['Mục tiêu học','Mức độ hiện tại'],
+   prompt:`Hãy thiết kế cho tôi kế hoạch học 8 tuần để nâng trình bán ERP ở vai trò giám đốc kinh doanh.
+
+Mục tiêu:
+- Hiểu sâu hơn về quy trình nghiệp vụ
+- Nói chuyện tốt hơn với CFO/COO/CIO
+- Làm proposal và business case chắc hơn
+- Coaching đội sales tốt hơn
+
+Yêu cầu:
+1. Mỗi tuần có 1 chủ đề chính
+2. Mỗi tuần có mục tiêu học
+3. Có bài tập ứng dụng vào công việc thật
+4. Có checklist tự đánh giá cuối tuần
+5. Có tiêu chí đo tiến bộ rõ ràng`,
+   outputs:['Roadmap 8 tuần','Bài tập ứng dụng','Checklist tự đánh giá'],
+   tip:'Thêm "tôi mạnh sales nhưng yếu nghiệp vụ sản xuất" để cá nhân hóa.'},
+
+  // ── F. PROJECT MANAGEMENT ──
+  {id:31,group:'pm',num:'PM 31',title:'Kick-off Meeting Package',
+   when:'Chuẩn bị buổi kick-off chính thức với khách hàng sau khi ký hợp đồng ERP.',
+   inputs:['Tên dự án / phạm vi / timeline','Danh sách stakeholder khách hàng','Danh sách team triển khai','Modules / phase đã ký'],
+   prompt:`Bạn là Giám đốc Dự án ERP giàu kinh nghiệm.
+
+Thông tin dự án:
+- Tên dự án: [tên]
+- Khách hàng: [tên công ty / ngành / quy mô]
+- Phạm vi: [modules]
+- Timeline: [tổng thời gian / phase]
+- Team khách hàng: [vai trò tham dự]
+- Team triển khai: [vai trò tham dự]
+
+H�y tạo bộ tài liệu kick-off gồm:
+1. Agenda kick-off meeting 3 giờ (bao gồm thời gian từng phần)
+2. 10 mục tiêu cần đạt được sau buổi kick-off
+3. 5 ground rules cần thiết lập ngay từ đầu
+4. RACI matrix mẫu cho dự án ERP (cột: khách hàng / PM / consultant / vendor)
+5. 10 rủi ro phổ biến cần cảnh báo sớm với khách hàng
+6. Slide deck outline cho buổi kick-off
+7. Email tóm tắt sau kick-off gửi sponsor
+
+Tone: chuyên nghiệp, tạo niềm tin, đặt kỳ vọng đúng ngay từ đầu.`,
+   outputs:['Agenda đầy đủ với timeblock','RACI matrix mẫu','Cảnh báo rủi ro sớm','Email follow-up sponsor'],
+   tip:'Thêm "dự án có nhiều công ty con" hoặc "khách hàng chưa từng dùng ERP" để điều chỉnh tone cảnh báo.'},
+
+  {id:32,group:'pm',num:'PM 32',title:'Steering Committee Report',
+   when:'Chuẩn bị báo cáo định kỳ cho Ban chỉ đạo dự án ở cấp C-level.',
+   inputs:['Project status notes','% hoàn thành các milestone','Issues & risks hiện tại','Budget consumed','Next milestones'],
+   prompt:`Tôi cần chuẩn bị báo cáo Steering Committee cho dự án ERP.
+
+Thông tin hiện trạng:
+[Paste project status notes]
+
+H�y tạo:
+1. Executive summary 1 trang (hiện trạng / RAG status / key decisions needed)
+2. Dashboard tiến độ (milestone / % hoàn thành / dự báo)
+3. Top 5 risks & issues với mức độ và hành động đề xuất
+4. Budget summary (đã dùng / còn lại / dự báo)
+5. Decisions cần Steering Committee phê duyệt
+6. Plan cho giai đoạn tiếp theo
+7. Slide outline cho buổi báo cáo (tối đa 10 slides)
+
+Yêu cầu:
+- Giọng C-level: ngắn, rõ, actionable
+- RAG status rõ ràng (Red / Amber / Green)
+- Không dùng jargon kỹ thuật
+- Tập trung vào quyết định và rủi ro`,
+   outputs:['Executive summary súc tích','RAG dashboard','Decisions cần phê duyệt','Slide outline'],
+   tip:'Thêm "dự án đang Amber/Red" để prompt tạo ra nội dung đề xuất recovery plan.'},
+
+  {id:33,group:'pm',num:'PM 33',title:'Risk & Issue Management',
+   when:'Khi cần xây dựng hoặc cập nhật Risk & Issue Log, hoặc phân tích một rủi ro cụ thể đang xảy ra.',
+   inputs:['Project context','Các dấu hiệu rủi ro / issue đang gặp','Giai đoạn dự án'],
+   prompt:`Tôi là PM dự án ERP và cần quản lý rủi ro hiệu quả.
+
+Thông tin dự án:
+[Paste context]
+
+H�y:
+1. Liệt kê 15 rủi ro phổ biến nhất trong dự án ERP (theo giai đoạn: thiết kế / build / UAT / go-live)
+2. Với mỗi rủi ro: mức xác suất / mức tác động / early warning signs / mitigation action
+3. Xây Risk Register mẫu dạng bảng (Risk ID / Description / Probability / Impact / Score / Owner / Mitigation / Status)
+4. Phân tích rủi ro sau và đề xuất xử lý:
+   [Mô tả rủi ro / issue cụ thể đang gặp]
+5. Template email leo thang (escalation) khi rủi ro trở thành issue nghiêm trọng
+
+Phân loại rủi ro theo: kỹ thuật / nhân sự / phạm vi / timeline / tài chính / tổ chức khách hàng.`,
+   outputs:['Risk Register mẫu','15 rủi ro phổ biến có phân tích','Escalation email template'],
+   tip:'Thêm "key user không tham gia đủ" hoặc "khách hàng yêu cầu custom nhiều" để phân tích sát hơn.'},
+
+  {id:34,group:'pm',num:'PM 34',title:'Change Request Management',
+   when:'Khi khách hàng yêu cầu thay đổi phạm vi, tính năng, hoặc timeline ngoài hợp đồng ban đầu.',
+   inputs:['Mô tả yêu cầu thay đổi của khách','Phạm vi gốc đã ký','Impact ước tính'],
+   prompt:`Khách hàng đang yêu cầu thay đổi phạm vi dự án ERP.
+
+Yêu cầu thay đổi:
+[Mô tả yêu cầu]
+
+Phạm vi hợp đồng gốc:
+[Phạm vi đã ký]
+
+H�y giúp tôi:
+1. Phân tích: yêu cầu này có trong scope gốc không? Lý do?
+2. Đánh giá impact: timeline / effort / cost / risk
+3. Viết Change Request document chuyên nghiệp gồm:
+   - Mô tả thay đổi
+   - Lý do phát sinh
+   - Impact analysis
+   - Options đề xuất (có CR / không CR / phương án thay thế)
+   - Quy trình phê duyệt
+4. Email trình bày với khách hàng về change request (tone: giải thích, không đối đầu)
+5. 5 cách phòng ngừa scope creep tương tự trong tương lai`,
+   outputs:['CR document','Impact analysis','Email giải thích khách hàng','Phòng ngừa scope creep'],
+   tip:'Thêm "khách hàng insist đây là trong scope" để prompt tạo ra cách phản hồi đàm phán.'},
+
+  {id:35,group:'pm',num:'PM 35',title:'UAT Management & Go-live Readiness',
+   when:'Chuẩn bị và quản lý giai đoạn UAT, đánh giá sẵn sàng go-live.',
+   inputs:['Danh sách module','Số lượng key users','Timeline UAT','Các vấn đề tồn đọng'],
+   prompt:`Dự án ERP sắp vào giai đoạn UAT và chuẩn bị go-live.
+
+Thông tin:
+- Modules: [danh sách]
+- Key users tham gia UAT: [số lượng / vai trò]
+- Timeline UAT: [số tuần]
+- Open issues hiện tại: [mô tả]
+
+H�y tạo:
+1. UAT Execution Plan (mục tiêu / timeline / phân công / tiêu chí pass)
+2. UAT Test Scenario mẫu cho [module cụ thể] (10 scenarios)
+3. Defect classification matrix (Critical / High / Medium / Low với định nghĩa và SLA fix)
+4. Go-live Readiness Checklist (30 items, phân theo: kỹ thuật / dữ liệu / người dùng / quy trình / hạ tầng)
+5. Go/No-Go decision framework
+6. Cutover plan outline (D-7 đến D+3)
+7. Communication plan go-live cho toàn công ty khách hàng`,
+   outputs:['UAT plan','30-item go-live checklist','Go/No-Go framework','Cutover plan'],
+   tip:'Thêm "khách hàng muốn go-live đúng ngày bất kể issues" để prompt tạo ra cách quản lý áp lực timeline.'},
+
+  {id:36,group:'pm',num:'PM 36',title:'Project Status Report tự động',
+   when:'Viết báo cáo tiến độ dự án hàng tuần / hàng tháng nhanh và chuẩn.',
+   inputs:['Notes từ tuần qua','Milestone status','Issues nổi bật'],
+   prompt:`Dựa trên notes tuần này, hãy viết Project Status Report cho dự án ERP.
+
+Notes:
+[Paste notes]
+
+Tạo report gồm:
+1. Overall RAG Status (Red/Amber/Green) và lý do
+2. Highlights tuần qua (3-5 điểm)
+3. Milestone tracker (đúng hạn / trễ / at-risk)
+4. Issues & Risks nổi bật tuần này
+5. Plan tuần tới
+6. Actions cần từ phía khách hàng
+7. Chỉ số sức khỏe dự án: schedule / budget / scope / quality / team
+
+Format: ngắn gọn, dùng được ngay để gửi cho sponsor và Steering Committee.
+Tone: trung thực, không tô hồng, rõ ràng về vấn đề.`,
+   outputs:['Status report đầy đủ','RAG status có lý do','Action items rõ ràng'],
+   tip:'Thêm "gửi nội bộ cho team" hoặc "gửi cho C-level khách hàng" để điều chỉnh độ chi tiết.'},
+
+  {id:37,group:'pm',num:'PM 37',title:'Post Go-live Hypercare & Lessons Learned',
+   when:'Quản lý giai đoạn hypercare sau go-live và rút bài học cho dự án tương lai.',
+   inputs:['Issues phát sinh sau go-live','Feedback từ users','Dữ liệu support tickets'],
+   prompt:`Dự án ERP vừa go-live. Tôi cần quản lý hypercare và đúc kết bài học.
+
+Thông tin sau go-live:
+[Paste issues / feedback / tickets]
+
+H�y tạo:
+1. Hypercare Plan 30 ngày (D+1 đến D+30: ưu tiên, phân công, SLA)
+2. Issue triage framework (Critical phải fix trong 4h / High 1 ngày / Medium 1 tuần)
+3. User adoption dashboard: chỉ số cần theo dõi để biết người dùng đang dùng ERP thật hay không
+4. Lessons Learned document:
+   - Điều làm tốt cần nhân rộng
+   - Điều cần làm khác cho dự án sau
+   - Root cause của 3 vấn đề lớn nhất
+   - 5 khuyến nghị cho dự án ERP tiếp theo
+5. Project closure email gửi sponsor`,
+   outputs:['Hypercare plan 30 ngày','Lessons Learned','Project closure email'],
+   tip:'Thêm "user adoption thấp sau go-live" để prompt tập trung vào change management.'},
+
+  {id:38,group:'pm',num:'PM 38',title:'Difficult Conversation với Khách Hàng',
+   when:'Khi cần xử lý tình huống khó: trễ deadline, vượt budget, khách hàng không hài lòng, leo thang.',
+   inputs:['Tình huống cụ thể','Lịch sử vấn đề','Mối quan hệ hiện tại'],
+   prompt:`Tôi là PM ERP và cần xử lý tình huống khó với khách hàng.
+
+Tình huống:
+[Mô tả cụ thể: vd dự án trễ 3 tuần / khách hàng đang escalate lên CEO / budget overrun]
+
+Lịch sử:
+[Bối cảnh và nguyên nhân]
+
+H�y giúp tôi:
+1. Phân tích: ai đúng ai sai, mức độ trách nhiệm của các bên
+2. Chuẩn bị cho cuộc họp khó (agenda / key messages / điều cần thừa nhận / điều cần giữ)
+3. Script mở đầu cuộc họp (60 giây)
+4. 5 cách phản hồi khi khách hàng tức giận và không hợp lý
+5. Recovery plan đề xuất: cụ thể, có timeline, có cam kết
+6. Email tóm tắt sau cuộc họp với các điểm đã thống nhất
+
+Tone: chịu trách nhiệm nhưng không tự trách quá mức, solution-focused, giữ quan hệ dài hạn.`,
+   outputs:['Phân tích trách nhiệm','Script họp','Recovery plan','Follow-up email'],
+   tip:'Thêm "khách hàng đang đòi penalty" hoặc "khách hàng muốn thay PM" để sắc hơn.'},
+
+  // ── G. BUSINESS CASE & ROI ──
+  {id:39,group:'bc',num:'BC 39',title:'Business Case ERP Full Package',
+   when:'Khi cần xây dựng Business Case toàn diện để khách hàng trình Ban điều hành / HĐQT phê duyệt ngân sách ERP.',
+   inputs:['Pain points đã xác định','Mục tiêu chuyển đổi','Số liệu doanh nghiệp (doanh thu / nhân sự / tồn kho)','Scope và investment ước tính'],
+   prompt:`Tôi cần xây dựng Business Case để khách hàng trình Ban điều hành phê duyệt dự án ERP.
+
+Thông tin doanh nghiệp:
+- Ngành: [ngành]
+- Quy mô: [doanh thu / nhân sự]
+- Hệ thống hiện tại: [Excel / legacy ERP / phần mềm nội bộ]
+- Pain points chính: [liệt kê]
+- Mục tiêu: [mục tiêu chuyển đổi]
+- Investment ước tính: [license / impl / training / infra]
+- Scope: [modules / phase]
+
+H�y xây dựng Business Case gồm:
+1. Executive Summary (1 trang, đọc trong 3 phút)
+2. Hiện trạng và chi phí ẩn của việc không thành (cost of inaction)
+3. Phương án đề xuất và lý do chọn
+4. Lợi ích định lượng (có số cụ thể): giảm nhân sự / giảm tồn kho / giảm cycle time / tăng tốc độ đóng sổ / giảm sai sót
+5. Lợi ích định tính: kiểm soát / quyết định / mở rộng / compliance
+6. Investment summary và phân loại chi phí (CAPEX / OPEX)
+7. ROI 3 năm và payback period
+8. Rủi ro và cách giảm thiểu
+9. So sánh option (ERP vs không ERP vs upgrade từng phần)
+10. Recommendation và bước tiếp theo
+
+Yêu cầu: phân biệt fact và giả định rõ ràng. Không overclaim lợi ích không có cơ sở. Giọng CFO đọc được.`,
+   outputs:['Business Case đầy đủ trình được ngay','Executive summary súc tích','ROI có số liệu cụ thể','So sánh options'],
+   tip:'Thêm "CFO rất nhạy vào phần giả định" hoặc "HĐQT yêu cầu payback dưới 3 năm" để prompt tập trung đúng.'},
+
+  {id:40,group:'bc',num:'BC 40',title:'ROI Calculator & Benefit Quantification',
+   when:'Khi cần lượng hóa lợi ích cụ thể theo từng ngành và mức độ vận hành.',
+   inputs:['Ngành','Quy mô (doanh thu, nhân sự, tồn kho)','Pain points đã xác định','Modules ERP sẽ triển khai'],
+   prompt:`Hãy giúp tôi lượng hóa lợi ích của dự án ERP theo từng hạng mục.
+
+Doanh nghiệp:
+- Ngành: [ngành]
+- Doanh thu hàng năm: [con số]
+- Nhân sự liên quan (finance, ops, warehouse, purchasing): [con số]
+- Giá trị tồn kho hiện tại: [con số]
+- Số ngày đóng sổ hiện tại: [con số]
+- Sai sót thủ công ước tính: [% hoặc con số nếu có]
+- Modules triển khai: [danh sách]
+
+H�y tạo:
+1. Benefit quantification template theo từng mục:
+   - Tiết kiệm lao động (cải thiện năng suất)
+   - Giảm tồn kho (inventory reduction)
+   - Giảm chi phí đóng sổ và báo cáo
+   - Giảm sai sót và rò rỉ chi phí
+   - Cải thiện cash flow
+   - Tránh chi phí audit / compliance
+2. Làm rõ giả định của từng mục lợi ích
+3. Bảng ROI 3 năm với các scenario: Conservative / Base / Optimistic
+4. Payback period theo từng scenario
+5. Hướng dẫn: làm sao validate các con số này với khách hàng
+
+Quy tắc: khi không có số liệu, dùng benchmark ngành và nêu rõ là benchmark.`,
+   outputs:['Benefit quantification theo từng mục','ROI 3 scenario','Payback period','Hướng dẫn validate với khách'],
+   tip:'Thêm "khách đang dùng Excel và có 5 nhân viên finance" để tiết kiệm lao động được cụ thể hơn.'},
+
+  {id:41,group:'bc',num:'BC 41',title:'TCO Comparison & Vendor Evaluation',
+   when:'Khi khách hàng so sánh nhiều nhà cung cấp ERP và cần framework đánh giá TCO.',
+   inputs:['Các vendor đang cạnh tranh','Quote của mỗi vendor','Scope đánh giá'],
+   prompt:`Khách hàng đang so sánh [số lượng] vendor ERP và cần framework đánh giá bài bản.
+
+Vendors đang cạnh tranh: [tên các vendor]
+Scope đánh giá: [modules / ngành / quy mô]
+
+H�y tạo:
+1. TCO Framework 5 năm với các mục chi phí:
+   - License / subscription
+   - Implementation
+   - Customization
+   - Training
+   - Infrastructure / cloud
+   - Maintenance & support
+   - Upgrade
+   - Hidden costs thường bị bỏ qua
+2. Scorecard đánh giá vendor (trọng số theo tiêu chí: function / vendor risk / TCO / implementation track record / local support)
+3. 10 câu hỏi phải đặt cho mỗi vendor để lộ hidden costs
+4. Red flags khi nghe vendor pitch
+5. Demo script: 10 tình huống test thực tế trong demo ERP
+6. Template báo cáo tóm tắt đánh giá vendor cho Steering Committee`,
+   outputs:['TCO 5 năm framework','Vendor scorecard','Demo script thực tế','Báo cáo tóm tắt cho Steering Committee'],
+   tip:'Thêm "một vendor quote thấp nhưng implementation track record yếu" để prompt tập trung vào rủi ro TCO ẩn.'},
+
+  {id:42,group:'bc',num:'BC 42',title:'CFO Conversation Preparation',
+   when:'Khi chuẩn bị gặp CFO để bảo vệ Business Case hoặc Investment Proposal ERP.',
+   inputs:['Business Case đã có','Bối cảnh CFO','Ngân sách ước tính'],
+   prompt:`Tôi sắp gặp CFO của khách hàng để bảo vệ Business Case ERP.
+
+Bối cảnh:
+- Ngành / quy mô: [thông tin]
+- CFO profile: [thận trọng / focus cash flow / mới tiếp nhận vai trò / đã có kinh nghiệm ERP]
+- Business Case hiện có: [tóm tắt ROI / payback]
+- Ngân sách ước tính: [con số]
+
+H�y chuẩn bị:
+1. 10 câu hỏi khó CFO thường đặt ra về ERP investment
+2. Cách trả lời từng câu (ngắn, có số, không hư cấu)
+3. 5 điều CFO không muốn nghe trong Business Case
+4. Cách trình bày ROI sao cho CFO tin (không phải chỉ đưa con số)
+5. Red lines: điều không nên nhượng bộ trong đàm phán ngân sách
+6. Opening statement 90 giây cho buổi gặp CFO
+7. Next step đề xuất sau buổi gặp
+
+Tone: bằng vai, tôn trọng, dựa trên data, không bán hàng quá lộ.`,
+   outputs:['10 câu hỏi khó + cách trả lời','Opening statement','Red lines đàm phán'],
+   tip:'Thêm "CFO vừa trải qua một dự án IT thất bại" để prompt tập trung vào tạo sự tin tưởng.'},
+
+  {id:43,group:'bc',num:'BC 43',title:'Business Case Stress Test',
+   when:'Khi muốn kiểm tra sức chịu đựng của Business Case trước khi trình khách hàng.',
+   inputs:['Business Case draft','Các giả định đã dùng'],
+   prompt:`Hãy stress test Business Case ERP này như một CFO khó tính và board member hoài nghi.
+
+Business Case:
+[Paste Business Case draft]
+
+H�y:
+1. Tìm 10 điểm yếu trong lập luận tài chính
+2. Xác định giả định nào lạc quan quá mức
+3. Tạo Sensitivity Analysis: nếu các giả định lợi ích giảm 30%, ROI thay đổi ra sao?
+4. Tìm các chi phí ẩn chưa được tính
+5. Chuyển đổi case này sang "Worst Case Scenario": ROI và payback vẫn đủ để được phê duyệt không?
+6. Đề xuất cách củng cố từng điểm yếu
+7. Phần nào nên rút ra khỏi Business Case vì không có đủ cơ sở?
+
+Quy tắc: hãy honest — một Business Case bị bác trong phòng họp tồi hơn nhiều so với một Business Case được chỉnh lý trước.`,
+   outputs:['10 điểm yếu và cách sửa','Sensitivity analysis','Worst case scenario','Phần nên lược bỏ'],
+   tip:'Thêm "board đã từng bác một dự án IT tương tự" để prompt nhấn đúng điểm nhạy cảm.'},
+
+  // ── H. KỸ THUẬT & DEV ──
+  {id:44,group:'tech',num:'Tech 44',title:'BC AL — Thiết kế Extension từ đầu',
+   when:'Khi cần thiết kế BC Extension mới: table, page, codeunit từ yêu cầu nghiệp vụ.',
+   inputs:['Mô tả yêu cầu nghiệp vụ','Module BC liên quan (Finance/WMS/Mfg/Sales)','Các field cần thêm','Workflow và logic cần xử lý'],
+   prompt:`Bạn là chuyên gia phát triển Microsoft Dynamics 365 Business Central (AL Language).
+
+Yêu cầu nghiệp vụ:
+[Mô tả yêu cầu cụ thể]
+
+Module BC liên quan: [Finance / WMS / Manufacturing / Sales / Purchase]
+Fields cần thêm: [danh sách fields, data type]
+Logic cần xử lý: [workflow, validation, auto-calculation]
+
+Hãy thiết kế BC Extension gồm:
+1. Object plan: danh sách objects cần tạo (TableExtension / PageExtension / Codeunit / Report) và mục đích từng object
+2. Table Extension design: fields mới với data type, relation, validation logic
+3. Page Extension design: layout thêm vào page nào, controls mới
+4. Codeunit skeleton: procedure signatures với mô tả logic
+5. Event subscription design: OnAfterValidate, OnBeforeInsert... nào cần subscribe
+6. Integration points: nếu cần gọi API hoặc kết nối module khác
+7. Test cases: 5 test scenario cần verify
+
+Output:
+- AL code skeleton với comments mô tả logic cần implement
+- Tuân thủ BC naming convention và AppSource guidelines
+- Chỉ rõ những gì cần custom so với standard BC`,
+   outputs:['Object plan đầy đủ','AL code skeleton','Event subscription design','5 test scenarios'],
+   tip:'Thêm "cần tương thích BC version 23+" hoặc "AppSource submission" để code tuân thủ đúng standards.'},
+
+  {id:45,group:'tech',num:'Tech 45',title:'BC AL — Code Review với GitHub Copilot',
+   when:'Khi cần review AL code bằng GitHub Copilot hoặc muốn tối ưu code BC hiện có.',
+   inputs:['AL code cần review','Mô tả chức năng của đoạn code','Performance concerns nếu có'],
+   prompt:`Hãy review đoạn AL code Business Central sau đây như một senior BC developer.
+
+AL Code:
+[Paste AL code vào đây]
+
+Mô tả chức năng: [mô tả]
+
+Hãy phân tích:
+1. Code quality: naming convention, structure, readability theo BC standards
+2. Performance issues: unnecessary loops, missing keys, FlowFilter misuse, excessive DB calls
+3. Error handling: missing error handling, unhandled edge cases
+4. Security: hardcoded values, permission issues, missing CODEUNIT.RUN guards
+5. BC Best Practices violations: wrong trigger usage, missing commit patterns
+6. Refactored version với comments giải thích từng cải tiến
+7. GitHub Copilot prompt gợi ý để auto-generate phần logic tương tự
+
+GitHub Copilot context comment mẫu để đặt trước code:
+// Copilot: This is Business Central AL extension for [module]. [Brief context about what this code does and what BC objects it interacts with]`,
+   outputs:['Danh sách issues theo mức độ','Refactored AL code','Copilot prompt pattern','BC best practices checklist'],
+   tip:'Thêm "cần optimize cho 100k+ records" để focus vào performance thay vì code style.'},
+
+  {id:46,group:'tech',num:'Tech 46',title:'BC — Debug & Root Cause Analysis',
+   when:'Khi gặp lỗi trong BC và cần tìm nguyên nhân gốc rễ nhanh.',
+   inputs:['Error message / stack trace từ Event Log','Bước tái hiện lỗi','Module và BC version','Customization objects liên quan'],
+   prompt:`Tôi đang gặp lỗi trong Microsoft Dynamics 365 Business Central.
+
+Error message:
+[Paste error message hoặc stack trace]
+
+Bước tái hiện:
+[Mô tả các bước tái hiện lỗi]
+
+Môi trường:
+- BC Version: [version]
+- Module: [module]
+- Customization liên quan: [tên extension/object bị ảnh hưởng]
+
+Hãy giúp tôi:
+1. Phân tích error message: loại lỗi, nguyên nhân phổ biến
+2. Root cause hypothesis: 3 nguyên nhân có khả năng cao nhất theo thứ tự
+3. Debug steps: từng bước debug trong AL Debugger / Event Log
+4. AL record query để kiểm tra data state
+5. Quick fix và long-term fix cho từng hypothesis
+6. GitHub Copilot prompt để tra cứu lỗi tương tự trong codebase
+7. Preventive measures để tránh lỗi tương tự
+
+Phân loại lỗi: runtime / logic / permission / data integrity / integration.`,
+   outputs:['Root cause hypotheses','Debug steps cụ thể','Quick fix + Long-term fix','Preventive measures'],
+   tip:'Paste thêm AL callstack từ Event Log để phân tích chính xác hơn. Thêm "lỗi xảy ra sau posting" để thu hẹp phạm vi.'},
+
+  {id:47,group:'tech',num:'Tech 47',title:'BC — API & Integration Design',
+   when:'Khi cần thiết kế API endpoint hoặc integration giữa BC và hệ thống bên ngoài.',
+   inputs:['Hệ thống cần tích hợp','Dữ liệu cần trao đổi và chiều sync','Tần suất sync','Authentication method'],
+   prompt:`Tôi cần thiết kế integration giữa Business Central và hệ thống bên ngoài.
+
+Thông tin integration:
+- Hệ thống ngoài: [tên / loại: ECommerce / WMS / POS / Payroll / CRM / Custom]
+- Dữ liệu cần trao đổi: [Items / Customers / Sales Orders / Invoices / Inventory...]
+- Chiều: [BC to External / External to BC / Bidirectional]
+- Tần suất: [Real-time / Batch / Scheduled]
+- Auth method: [OAuth 2.0 / Basic / API Key]
+
+Hãy thiết kế:
+1. Integration architecture: pattern phù hợp (Direct API / Middleware / Azure Service Bus / Logic Apps)
+2. BC API page design: AL code skeleton cho custom API page nếu standard API không đủ
+3. Endpoint mapping: BC standard API endpoints có thể dùng ngay
+4. Error handling & retry strategy
+5. Data mapping schema: field mapping giữa 2 hệ thống dạng bảng
+6. Security: permission sets, HTTPS, token management
+7. Monitoring & logging approach
+8. Test plan: 5 integration test cases quan trọng nhất
+9. GitHub Copilot prompts để generate boilerplate integration code nhanh`,
+   outputs:['Integration architecture recommendation','API endpoint mapping','AL API page skeleton','Security & test plan'],
+   tip:'Thêm "cần support multi-company BC" hoặc "integration qua Azure Logic Apps" để design phù hợp hơn.'},
+
+  {id:48,group:'tech',num:'Tech 48',title:'D365 FO — X++ Development với Copilot',
+   when:'Khi cần phát triển customization trong D365 Finance & Operations bằng X++ với sự hỗ trợ của GitHub Copilot.',
+   inputs:['Yêu cầu nghiệp vụ cụ thể','Module FO liên quan','Loại object cần tạo','Business logic cần implement'],
+   prompt:`Bạn là senior X++ developer cho Microsoft Dynamics 365 Finance & Operations.
+
+Yêu cầu nghiệp vụ:
+[Mô tả yêu cầu cụ thể]
+
+Module FO: [Finance / Supply Chain / Manufacturing / HR / Project Management]
+Object type: [Table / Form / Class / Report / Data Entity / Service / Batch Job]
+Business logic: [workflow, calculation, integration, scheduled processing]
+
+Hãy thiết kế X++ solution:
+1. Solution architecture: danh sách objects và dependencies
+2. Table/EDT design: nếu cần extend hoặc tạo mới
+3. Business logic class: X++ class skeleton với method signatures và docstrings
+4. Form customization: Chain of Command (COC) pattern đúng cách — không override trực tiếp
+5. Event handler design: EventHandlerAttribute subscriptions
+6. Batch job design: nếu cần RunBaseBatch hoặc SysOperationServiceController
+7. Security: Duty / Privilege / Role objects cần tạo
+8. GitHub Copilot workflow cho Visual Studio X++ development:
+   - Comment pattern tối ưu để Copilot suggest đúng
+   - Copilot Chat prompts cho X++ refactoring
+
+Tuân thủ: D365 FO best practices, COC pattern, SysExtension framework nếu phù hợp.`,
+   outputs:['X++ solution architecture','Class skeleton với COC','Event handler design','Copilot workflow cho X++'],
+   tip:'Thêm "cần ISV-deployable" hoặc "tương thích với LCS deployment pipeline" để code theo đúng ISV standards.'},
+
+  {id:49,group:'tech',num:'Tech 49',title:'GitHub Copilot — Prompt Engineering cho BC/FO',
+   when:'Khi muốn dùng GitHub Copilot hiệu quả hơn để viết AL hoặc X++ code cho ERP.',
+   inputs:['Tính năng cần implement','Ngôn ngữ (AL / X++)','Context codebase và patterns đang dùng'],
+   prompt:`Tôi là developer BC/FO và muốn dùng GitHub Copilot hiệu quả hơn để viết ERP code.
+
+Tính năng cần implement: [mô tả yêu cầu]
+Ngôn ngữ: [AL / X++]
+Context hiện có: [mô tả codebase, business domain, patterns đang dùng]
+
+Hãy tạo cho tôi:
+1. Copilot context comment block tối ưu (đặt trước code để Copilot hiểu domain ERP):
+   Ví dụ pattern: "// BC Extension for [Module]. This codeunit handles [function]. Interacts with [tables]. Business rule: [rule]."
+
+2. 10 Copilot prompt patterns hiệu quả cho BC/FO:
+   - Generate table extension với validation
+   - Generate codeunit với error handling
+   - Generate API page cho integration
+   - Generate batch report
+   - Refactor legacy code sang modern pattern
+
+3. Copilot Chat prompts (dùng trong VS Code):
+   - /explain: explain BC standard object behavior
+   - /fix: fix AL compilation errors
+   - /tests: generate AL test codeunit
+   - Custom: "Find similar pattern in BC base app"
+
+4. Workflow: kết hợp Copilot + manual coding hiệu quả nhất theo từng task type
+
+5. 5 anti-patterns khi dùng Copilot cho ERP code cần tránh
+
+6. Trước/Sau: prompt tệ vs prompt tốt cho cùng 1 BC requirement`,
+   outputs:['Copilot context block template','10 prompt patterns BC/FO','Copilot Chat workflow','Anti-patterns list + ví dụ trước/sau'],
+   tip:'Thêm "team 3 người cần standardize" để tạo ra Team Copilot Playbook dùng chung.'},
+
+  {id:50,group:'tech',num:'Tech 50',title:'Fit/Gap Analysis — BC/FO vs Yêu Cầu Khách Hàng',
+   when:'Khi cần phân tích Fit/Gap giữa yêu cầu khách hàng và standard BC/FO functionality.',
+   inputs:['Danh sách business requirements','BC/FO version và edition','Modules in scope','Current process description'],
+   prompt:`Tôi cần thực hiện Fit/Gap Analysis cho dự án BC/FO.
+
+Business Requirements:
+[Paste danh sách requirements — mỗi requirement một dòng]
+
+Scope:
+- Solution: [BC / FO / cả hai]
+- Version: [version]
+- Edition: [Essentials / Premium / Finance / SCM...]
+- Modules: [danh sách modules]
+
+Hãy phân tích và tạo output dạng bảng:
+1. FIT: requirement nào standard BC/FO cover được 100% — note tên menu/feature
+2. PARTIAL FIT: requirement nào cần config/setup (không cần code) — hướng dẫn config
+3. GAP — Minor: cần Extension nhỏ, ước tính 1-3 ngày
+4. GAP — Medium: feature development, ước tính 3-10 ngày
+5. GAP — Major: ISV solution hoặc complex custom, cần sizing riêng
+6. Risk assessment: gap nào rủi ro cao về kỹ thuật / timeline
+7. Alternative: standard workaround thay vì custom
+8. Decision matrix: nên custom / dùng ISV / thay đổi process / loại bỏ requirement
+
+Format output: dạng bảng có thể paste vào Excel ngay (columns: Req# / Description / Fit/Gap / Effort Days / Risk / Decision / Notes).`,
+   outputs:['Fit/Gap bảng Excel-ready','Risk assessment theo gap','Effort estimate (man-days)','Decision matrix'],
+   tip:'Thêm "khách hàng không muốn thay đổi process" để analysis tập trung vào customization path thay vì process change.'},
+
+  {id:51,group:'tech',num:'Tech 51',title:'Technical Spec — FDD/TDD Writing',
+   when:'Khi cần viết Functional Design Document hoặc Technical Specification cho customization BC/FO.',
+   inputs:['Mô tả yêu cầu nghiệp vụ','Objects và modules liên quan','Business rules cụ thể','Integration points'],
+   prompt:`Tôi cần viết Technical Specification cho customization BC/FO.
+
+Thông tin:
+- Tên tính năng: [tên]
+- Module: [module]
+- Yêu cầu nghiệp vụ: [mô tả chi tiết]
+- Business rules: [các rules cụ thể]
+- Integration: [các điểm tích hợp nếu có]
+
+Hãy viết Technical Specification document gồm:
+1. Overview: mục tiêu, scope, out-of-scope, assumptions
+2. Business Rules: dạng bảng If-condition / Then-action / Else-action
+3. Data Model: tables affected, fields mới, relationships
+4. Process Flow: từng bước xử lý (numbered list với điều kiện rẽ nhánh)
+5. UI Specification: pages/forms bị ảnh hưởng, fields mới, validations, messages
+6. Technical Design:
+   - Objects cần tạo/modify (không cần code, chỉ cần tên và mục đích)
+   - Key logic description
+   - Event triggers và sequence
+7. Error Messages: danh sách error/warning messages cần implement
+8. Test Scenarios: 10 test cases theo format Given / When / Then / Expected Result
+9. Open Questions: điểm cần confirm với khách hàng trước khi code
+
+Tone: kỹ thuật, chính xác, đủ để developer khác implement không cần hỏi thêm.`,
+   outputs:['FDD/TDD document hoàn chỉnh','Business rules dạng bảng','10 test cases','Open questions list'],
+   tip:'Thêm "viết bằng tiếng Anh, format Word-friendly" nếu document cần gửi cho offshore development team.'},
+
+  {id:52,group:'tech',num:'Tech 52',title:'Performance Audit — BC/FO System Tuning',
+   when:'Khi hệ thống BC/FO chạy chậm hoặc cần audit performance trước go-live.',
+   inputs:['Triệu chứng cụ thể (slow page / timeout / high memory)','Module bị ảnh hưởng','Data volume và số concurrent users','Custom objects liên quan'],
+   prompt:`Hệ thống BC/FO đang gặp vấn đề performance. Tôi cần phân tích và tối ưu.
+
+Triệu chứng:
+[Mô tả: trang nào chậm / timeout khi nào / error gì / response time]
+
+Context:
+- Module: [module]
+- Data volume: [số records trong các tables chính, số users concurrent]
+- Custom objects: [danh sách customization đang chạy]
+- Infrastructure: [On-prem / SaaS / Hybrid, CPU/RAM specs nếu có]
+
+Hãy tạo:
+1. Performance diagnosis checklist (20+ items): từ DB → application → network → client
+2. Root causes phổ biến theo từng triệu chứng:
+   - Slow list page
+   - Slow posting / batch job
+   - Report timeout
+   - High memory / CPU
+3. AL/X++ anti-patterns gây performance issues phổ biến nhất
+4. Database optimization: index recommendations, query analysis approach
+5. Cách dùng AL Performance Profiler / SQL Trace để pinpoint bottleneck
+6. Quick wins: 5 thứ có thể làm ngay không cần code hoặc không cần downtime
+7. Long-term fixes: architecture changes cần planning
+8. Performance benchmark: cách đo before/after để validate improvement`,
+   outputs:['20-item diagnosis checklist','Root cause mapping theo triệu chứng','Quick wins list','Performance testing approach'],
+   tip:'Attach AL Performance Profiler output hoặc SQL Profiler trace để phân tích chính xác thay vì hypothetical.'},
+
+  {id:53,group:'tech',num:'Tech 53',title:'DevOps & ALOps — CI/CD Pipeline cho BC Extension',
+   when:'Khi cần setup pipeline CI/CD cho Business Central Extension với GitHub Actions hoặc Azure DevOps.',
+   inputs:['Môi trường BC (SaaS / On-prem / Docker)','Git platform (GitHub / Azure DevOps)','Team size và workflow hiện tại','Deployment targets (Dev/Test/UAT/Prod)'],
+   prompt:`Tôi cần setup DevOps/ALOps pipeline cho Business Central Extension development.
+
+Môi trường:
+- BC type: [SaaS / On-prem / Docker container]
+- Source control: [GitHub / Azure DevOps]
+- Team: [số developers, branching workflow hiện tại nếu có]
+- Target environments: [Dev / Test / UAT / Production]
+- Container registry: [GitHub Packages / Azure Container Registry / Docker Hub]
+
+Hãy thiết kế:
+1. Branch strategy: Git branching model phù hợp cho BC ALOps (feature / develop / release / hotfix / main)
+2. CI Pipeline stages:
+   - Build: compile AL, dependency resolution
+   - Lint: AL Code Analyzer rules enforcement
+   - Test: AL Test Runner với Docker BC container
+   - Package: tạo .app file signed
+3. CD Pipeline stages:
+   - Deploy to Dev: tự động khi merge to develop
+   - Deploy to Test/UAT: manual approval gate
+   - Deploy to Prod: release pipeline với rollback
+4. app.json và AL workspace best practices
+5. Automated testing strategy: AL Test Codeunit structure
+6. GitHub Copilot integration trong workflow: code review, PR description generation
+7. Pipeline YAML outline (GitHub Actions):
+   name: BC-ALOps-Pipeline
+   on: push / pull_request
+   jobs: build / test / deploy
+8. Monitoring sau deployment: telemetry, error alerting
+9. Rollback strategy khi deployment fail
+
+Ưu tiên: fast feedback loop, repeatability, minimal manual steps.`,
+   outputs:['Branch strategy','Pipeline architecture','YAML pipeline outline','AL testing framework setup'],
+   tip:'Thêm "team đang submit AppSource" để thêm validation rules và AppSource checklist vào pipeline.'},
+];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let currentGroup = 'all';
+let searchQuery = '';
+let currentPromptId = null;
+let adminUnlocked = false;
+let editingId = null;
+let prompts = JSON.parse(localStorage.getItem('nw_prompts') || 'null') || JSON.parse(JSON.stringify(PROMPTS));
+const ADMIN_PW = localStorage.getItem('nw_admin_pw') || 'naviworld2026';
+
+function savePrompts() { localStorage.setItem('nw_prompts', JSON.stringify(prompts)); }
+
+// ═══════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════
+function renderSidebar() {
+  const nav = document.getElementById('sidebarNav');
+  const q = searchQuery.toLowerCase();
+
+  let html = `<div class="group-section">
+    <button class="group-btn ${currentGroup==='all'?'active':''}" onclick="setGroup('all')">
+      <div class="group-icon" style="background:rgba(74,159,232,0.12);font-size:14px">🔮</div>
+      <div class="group-info"><div class="group-name">Tất cả</div><div class="group-count">${prompts.length} prompts</div></div>
+    </button>
+  </div>`;
+
+  GROUPS.forEach(g => {
+    const gPrompts = prompts.filter(p => p.group === g.id);
+    const isOpen = currentGroup === g.id || (q && gPrompts.some(p => matchSearch(p,q)));
+    const isActive = currentGroup === g.id;
+    html += `<div class="group-section">
+      <button class="group-btn ${isActive?'active':''} ${isOpen?'open':''}" onclick="toggleGroup('${g.id}')">
+        <div class="group-icon" style="background:${g.bg}">${g.icon}</div>
+        <div class="group-info"><div class="group-name">${g.label}</div><div class="group-count">${gPrompts.length} prompts</div></div>
+        <span class="group-chevron">›</span>
+      </button>
+      <div class="prompt-list">${gPrompts.map(p=>`
+        <button class="prompt-nav-item ${currentPromptId===p.id?'active':''}" onclick="openDetail(${p.id})">${p.num}: ${p.title}</button>
+      `).join('')}</div>
+    </div>`;
+  });
+
+  nav.innerHTML = html;
+}
+
+function toggleGroup(groupId) {
+  if (currentGroup === groupId) { currentGroup = 'all'; }
+  else { currentGroup = groupId; }
+  renderSidebar();
+  renderMain();
+  document.getElementById('topbarTitle').textContent = currentGroup === 'all' ? 'Tất cả Prompts' :
+    GROUPS.find(g=>g.id===currentGroup)?.label || 'Tất cả';
+}
+
+function setGroup(g) {
+  currentGroup = g;
+  renderSidebar();
+  renderMain();
+  document.getElementById('topbarTitle').textContent = g === 'all' ? 'Tất cả Prompts' :
+    GROUPS.find(x=>x.id===g)?.label || 'Tất cả';
+}
+
+// ═══════════════════════════════════════════
+// SEARCH
+// ═══════════════════════════════════════════
+function matchSearch(p, q) {
+  return p.title.toLowerCase().includes(q) || p.num.toLowerCase().includes(q) ||
+    p.when.toLowerCase().includes(q) || p.prompt.toLowerCase().includes(q) ||
+    GROUPS.find(g=>g.id===p.group)?.label.toLowerCase().includes(q);
+}
+function handleSearch(val) {
+  searchQuery = val.trim();
+  currentGroup = 'all';
+  renderMain();
+  renderSidebar();
+  const matched = prompts.filter(p=>!searchQuery||matchSearch(p,searchQuery.toLowerCase()));
+  document.getElementById('searchCount').textContent = searchQuery ? matched.length : '';
+}
+
+// ═══════════════════════════════════════════
+// MAIN CONTENT
+// ═══════════════════════════════════════════
+function renderMain() {
+  const q = searchQuery.toLowerCase();
+  const filtered = prompts.filter(p => {
+    const groupMatch = currentGroup === 'all' || p.group === currentGroup;
+    const searchMatch = !q || matchSearch(p, q);
+    return groupMatch && searchMatch;
+  });
+
+  let html = '';
+
+  if (currentGroup === 'all' && !searchQuery) {
+    html += renderHero();
+  }
+
+  if (filtered.length === 0) {
+    html += `<div class="no-results"><div class="no-results-icon">🔍</div><div class="no-results-title">Không tìm thấy kết quả</div><div>Thử từ khóa khác hoặc xem tất cả prompts</div></div>`;
+  } else {
+    if (currentGroup === 'all' && !searchQuery) {
+      GROUPS.forEach(g => {
+        const gp = filtered.filter(p => p.group === g.id);
+        if (!gp.length) return;
+        html += `<div class="section-header"><div class="section-title"><span style="width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;background:${g.bg};font-size:12px">${g.icon}</span> ${g.label}</div><div class="section-count">${gp.length} prompts</div></div>`;
+        html += `<div class="cards-grid" style="margin-bottom:32px">${gp.map(p=>renderCard(p)).join('')}</div>`;
+      });
+    } else {
+      const groupName = currentGroup !== 'all' ? GROUPS.find(g=>g.id===currentGroup)?.label : '';
+      if (searchQuery) html += `<div class="section-header"><div class="section-title">🔍 Kết quả tìm kiếm "${searchQuery}"</div><div class="section-count">${filtered.length} kết quả</div></div>`;
+      else if (groupName) html += `<div class="section-header"><div class="section-title">${GROUPS.find(g=>g.id===currentGroup)?.icon} ${groupName}</div><div class="section-count">${filtered.length} prompts</div></div>`;
+      html += `<div class="cards-grid">${filtered.map(p=>renderCard(p)).join('')}</div>`;
+    }
+  }
+
+  document.getElementById('mainContent').innerHTML = html;
+  // Glow effect
+  document.querySelectorAll('.prompt-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100).toFixed(1)+'%');
+      card.style.setProperty('--my', ((e.clientY-r.top)/r.height*100).toFixed(1)+'%');
+    });
+  });
+}
+
+function renderHero() {
+  return `<div class="overview-hero">
+    <div class="hero-eyebrow">NaviWorld ERP · Prompt Intelligence Platform</div>
+    <h1 class="hero-title">NaviWorld Prompt Library</h1>
+    <p class="hero-sub">Hệ thống prompt chuẩn hóa cho toàn bộ nghiệp vụ công ty ERP — Sales, Proposal, Forecast, Coaching, Learning, Quản trị Dự án, Business Case, và Kỹ thuật phát triển giải pháp BC/FO. 53 prompts, 8 nhóm, dùng được ngay.</p>
+    <div class="hero-meta">
+      <div class="hero-stat"><span class="dot" style="background:#F5A623"></span>A. Sales: <strong>8</strong></div>
+      <div class="hero-stat"><span class="dot" style="background:#4A9FE8"></span>B. Proposal: <strong>6</strong></div>
+      <div class="hero-stat"><span class="dot" style="background:#34D399"></span>C. Forecast: <strong>6</strong></div>
+      <div class="hero-stat"><span class="dot" style="background:#A78BFA"></span>D. Coaching: <strong>5</strong></div>
+      <div class="hero-stat"><span class="dot" style="background:#2DD4BF"></span>E. Learning: <strong>5</strong></div>
+      <div class="hero-stat"><span class="dot" style="background:#FB923C"></span>F. PM: <strong>8</strong></div>
+      <div class="hero-stat"><span class="dot" style="background:#F87171"></span>G. Business Case: <strong>5</strong></div>
+      <div class="hero-stat"><span class="dot" style="background:#38BDF8"></span>H. Kỹ Thuật & Dev: <strong>10</strong></div>
+    </div>
+  </div>`;
+}
+
+function renderCard(p) {
+  const g = GROUPS.find(x=>x.id===p.group);
+  return `<div class="prompt-card" onclick="openDetail(${p.id})">
+    <div class="card-header">
+      <div class="card-num">${p.num}</div>
+      <span class="card-group-badge" style="background:${g?.bg};color:${g?.color}">${g?.label||p.group}</span>
+    </div>
+    <div class="card-title">${p.title}</div>
+    <div class="card-desc">${p.when}</div>
+    <div class="card-footer">
+      <div class="card-tags">${(p.inputs||[]).slice(0,2).map(i=>`<span class="tag">${i.split('(')[0].trim()}</span>`).join('')}</div>
+      <span class="card-cta">Xem →</span>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+// DETAIL VIEW
+// ═══════════════════════════════════════════
+function openDetail(id) {
+  const p = prompts.find(x=>x.id===id);
+  if (!p) return;
+  currentPromptId = id;
+  renderSidebar();
+  const g = GROUPS.find(x=>x.id===p.group);
+  document.getElementById('detailBreadcrumb').innerHTML = `<strong>${p.num}</strong> · ${g?.label||p.group}`;
+  document.getElementById('detailEditBtn').style.display = adminUnlocked ? 'flex' : 'none';
+
+  // Highlight placeholders
+  const highlightedPrompt = p.prompt.replace(/\[([^\]]+)\]/g, '<span class="ph">[$1]</span>');
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-eyebrow">${p.num} · ${g?.label||p.group}</div>
+    <div class="detail-title">${p.title}</div>
+    <div class="detail-meta">
+      <div class="detail-meta-item">📋 ${(p.inputs||[]).length} đầu vào</div>
+      <div class="detail-meta-item">✅ ${(p.outputs||[]).length} đầu ra</div>
+      <div class="detail-meta-item" style="color:${g?.color}">●&nbsp;${g?.label||''}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Dùng khi nào</div>
+      <div class="when-box">${p.when}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Đầu vào cần chuẩn bị</div>
+      <div class="input-list">${(p.inputs||[]).map(i=>`<div class="input-item"><div class="input-dot"></div>${i}</div>`).join('')}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Prompt</div>
+      <div class="prompt-box">
+        <div class="prompt-box-header">
+          <span class="prompt-box-label">PROMPT · Điền các phần [trong ngoặc vuông]</span>
+          <button class="copy-btn" onclick="copyPrompt(${p.id})">📋 Copy</button>
+        </div>
+        <div class="prompt-content">${highlightedPrompt}</div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Đầu ra mong đợi</div>
+      <div class="output-list">${(p.outputs||[]).map(o=>`<div class="output-item"><div class="output-check">✓</div>${o}</div>`).join('')}</div>
+    </div>
+    ${p.tip?`<div class="detail-section">
+      <div class="detail-section-title">Mẹo chỉnh nhanh</div>
+      <div class="tip-box"><div class="tip-icon">💡</div><div class="tip-text">${p.tip}</div></div>
+    </div>`:''}`;
+
+  document.getElementById('detailOverlay').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('open');
+  currentPromptId = null;
+  renderSidebar();
+}
+
+function copyPrompt(id) {
+  const p = prompts.find(x=>x.id===id);
+  if (!p) return;
+  navigator.clipboard.writeText(p.prompt).then(() => showToast('success','✓','Đã copy prompt!'));
+}
+function copyCurrentPrompt() { if (currentPromptId) copyPrompt(currentPromptId); }
+function editCurrentPrompt() { if (currentPromptId) { closeDetail(); openAdminForm(currentPromptId); } }
+
+// ═══════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════
+function openAdmin() {
+  const m = document.getElementById('adminModal');
+  if (!adminUnlocked) {
+    m.innerHTML = `<div class="auth-lock">
+      <div class="auth-icon">🔐</div>
+      <div class="auth-title">Admin Panel</div>
+      <div class="auth-desc">Nhập mật khẩu để chỉnh sửa nội dung prompt</div>
+      <input type="password" class="auth-input" id="authInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkAdmin()">
+      <button class="btn btn-primary" style="width:220px" onclick="checkAdmin()">Đăng nhập</button>
+      <div style="margin-top:10px;font-size:11px;color:#6B84A8">Mặc định: <span style="font-family:'DM Mono',monospace;color:var(--gold)">naviworld2026</span></div>
+    </div>`;
+  } else {
+    renderAdminList();
+  }
+  document.getElementById('adminOverlay').classList.add('open');
+}
+
+function checkAdmin() {
+  const v = document.getElementById('authInput').value;
+  if (v === ADMIN_PW || v === localStorage.getItem('nw_admin_pw') || v === 'naviworld2026') {
+    adminUnlocked = true;
+    renderAdminList();
+    showToast('success','✓','Đăng nhập thành công!');
+  } else {
+    const inp = document.getElementById('authInput');
+    inp.classList.add('err'); inp.value = '';
+    setTimeout(()=>inp.classList.remove('err'),500);
+  }
+}
+
+function renderAdminList() {
+  const m = document.getElementById('adminModal');
+  m.innerHTML = `
+    <div class="admin-modal-header">
+      <div><div class="admin-subtitle">Admin Panel</div><div class="admin-modal-title">Quản lý Prompt Library</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="openNewPrompt()">+ Thêm mới</button>
+        <button class="admin-icon-btn" onclick="closeAdmin()" style="width:32px;height:32px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto">
+      ${prompts.map(p=>{
+        const g=GROUPS.find(x=>x.id===p.group);
+        return `<div style="display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 12px">
+          <span style="font-size:13px;flex-shrink:0">${g?.icon||'📄'}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.num}: ${p.title}</div>
+            <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">${g?.label||p.group}</div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;flex-shrink:0" onclick="closeAdmin();openAdminForm(${p.id})">✏️ Sửa</button>
+          <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;flex-shrink:0;color:var(--red);border-color:rgba(248,113,113,0.3)" onclick="deletePrompt(${p.id})">🗑</button>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="admin-footer" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+        <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.1em">Đổi mật khẩu</div>
+        <div style="display:flex;gap:6px">
+          <input type="password" id="newPwInp" placeholder="Mật khẩu mới" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--white);font-size:12px;padding:6px 10px;outline:none;flex:1">
+          <button class="btn btn-ghost" style="font-size:11px" onclick="changePw()">Lưu</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function changePw() {
+  const v = document.getElementById('newPwInp')?.value.trim();
+  if (!v||v.length<4){showToast('error','✕','Ít nhất 4 ký tự');return;}
+  localStorage.setItem('nw_admin_pw',v);
+  showToast('success','✓','Đã đổi mật khẩu!');
+}
+
+function closeAdmin() { document.getElementById('adminOverlay').classList.remove('open'); }
+
+function openNewPrompt() { closeAdmin(); openAdminForm(null); }
+
+function openAdminForm(id) {
+  editingId = id;
+  const p = id ? prompts.find(x=>x.id===id) : null;
+  const m = document.getElementById('adminModal');
+  const groupOpts = GROUPS.map(g=>`<option value="${g.id}" ${p?.group===g.id?'selected':''}>${g.label}</option>`).join('');
+
+  m.innerHTML = `
+    <div class="admin-modal-header">
+      <div><div class="admin-subtitle">${p?'CHỈNH SỬA':'THÊM MỚI'}</div><div class="admin-modal-title">${p?p.title:'Prompt mới'}</div></div>
+      <button class="admin-icon-btn" onclick="closeAdmin()" style="width:32px;height:32px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Mã số (VD: Sales 09)</label>
+        <input class="form-input" id="fNum" value="${p?.num||''}" placeholder="Sales 09">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nhóm</label>
+        <select class="form-select" id="fGroup">${groupOpts}</select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Tiêu đề *</label>
+        <input class="form-input" id="fTitle" value="${p?.title||''}" placeholder="Tên prompt">
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Dùng khi nào *</label>
+        <input class="form-input" id="fWhen" value="${(p?.when||'').replace(/"/g,'&quot;')}" placeholder="Mô tả ngữ cảnh sử dụng">
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Đầu vào cần chuẩn bị (mỗi dòng 1 mục)</label>
+        <textarea class="form-textarea" id="fInputs" style="min-height:80px">${(p?.inputs||[]).join('\n')}</textarea>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Prompt * (dùng [ngoặc vuông] cho phần cần điền)</label>
+        <textarea class="form-textarea" id="fPrompt" style="min-height:200px">${p?.prompt||''}</textarea>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Đầu ra mong đợi (mỗi dòng 1 mục)</label>
+        <textarea class="form-textarea" id="fOutputs" style="min-height:80px">${(p?.outputs||[]).join('\n')}</textarea>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Mẹo chỉnh nhanh</label>
+        <input class="form-input" id="fTip" value="${(p?.tip||'').replace(/"/g,'&quot;')}" placeholder="Gợi ý cách tùy chỉnh prompt">
+      </div>
+    </div>
+    <div class="admin-footer">
+      <button class="btn btn-primary" style="flex:1" onclick="savePromptForm()">💾 Lưu</button>
+      <button class="btn btn-ghost" onclick="closeAdmin()">Hủy</button>
+    </div>`;
+  document.getElementById('adminOverlay').classList.add('open');
+}
+
+function savePromptForm() {
+  const title = document.getElementById('fTitle').value.trim();
+  const prompt = document.getElementById('fPrompt').value.trim();
+  if (!title||!prompt){showToast('error','✕','Cần nhập tiêu đề và prompt');return;}
+  const data = {
+    id: editingId || (Math.max(...prompts.map(p=>p.id),0)+1),
+    num: document.getElementById('fNum').value.trim(),
+    group: document.getElementById('fGroup').value,
+    title,
+    when: document.getElementById('fWhen').value.trim(),
+    inputs: document.getElementById('fInputs').value.split('\n').map(s=>s.trim()).filter(Boolean),
+    prompt,
+    outputs: document.getElementById('fOutputs').value.split('\n').map(s=>s.trim()).filter(Boolean),
+    tip: document.getElementById('fTip').value.trim(),
+  };
+  if (editingId) {
+    const idx = prompts.findIndex(p=>p.id===editingId);
+    if (idx>-1) prompts[idx]=data;
+    showToast('success','✓','Đã cập nhật prompt!');
+  } else {
+    prompts.push(data);
+    showToast('success','✓','Đã thêm prompt mới!');
+  }
+  savePrompts(); closeAdmin(); renderAll();
+}
+
+function deletePrompt(id) {
+  const p = prompts.find(x=>x.id===id);
+  if (!confirm(`Xóa "${p?.title}"? Không thể hoàn tác.`)) return;
+  prompts = prompts.filter(x=>x.id!==id);
+  savePrompts(); renderAdminList(); renderAll();
+  showToast('success','✓','Đã xóa prompt');
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function showToast(type, icon, msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastMsg').textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+function renderAll() { renderSidebar(); renderMain(); }
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){closeDetail();closeAdmin();}
+});
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+renderAll();
+</script>
+</body>
+</html>
